@@ -1,0 +1,70 @@
+@use "../../styles/variables" as v;
+
+.settings-wrapper {
+    padding: v.$gap-lg;
+
+    h1 {
+        margin-bottom: v.$gap-lg;
+    }
+
+    .integration-card {
+        display: flex;
+        flex-direction: column;
+        gap: v.$gap-sm;
+        max-width: 500px;
+
+        h3 {
+            font-size: 1.1rem;
+        }
+
+        p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: v.$gap-md;
+        }
+
+        button {
+            padding: v.$gap-md;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-radius: v.$radius-none; // Keep it sharp
+            transition: all 0.2s ease;
+
+            &.connect-btn {
+                background-color: var(--accent);
+                color: var(--bg-secondary);
+                border: 2px solid var(--accent);
+                cursor: pointer;
+
+                &:hover {
+                    background-color: var(--bg-secondary);
+                    color: var(--accent);
+                }
+            }
+
+            &.connected-btn {
+                background-color: transparent;
+                color: var(--text-secondary);
+                border: 2px solid var(--border-color);
+                cursor: not-allowed;
+            }
+
+            &.disconnect-btn {
+                background-color: transparent;
+                color: #ef4444; // A clean, sharp red
+                border: 2px solid #ef4444;
+                cursor: pointer;
+
+                &:hover {
+                    background-color: #ef4444;
+                    color: var(--bg-secondary);
+                }
+
+                &:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+            }
+        }
+    }
+}

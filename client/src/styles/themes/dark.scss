@@ -1,0 +1,10 @@
+[data-theme="dark"] {
+    --bg-primary: #{$gray-900};
+    --bg-secondary: #{$gray-800};
+    --text-primary: #{$gray-50};
+    --text-secondary: #{$gray-100};
+    --border-color: #{$gray-700};
+    --accent: #{$white};
+
+    --table-bg: #{$gray-900};
+}

@@ -1,0 +1,186 @@
+@use '../../../../components/modals/modals-base.scss' as *;
+@use '../../../../styles/variables' as v;
+
+@include modal-structure;
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+
+    // Make the modal wider to fit the 2-column design
+    width: 90vw;
+    max-width: 1000px;
+
+    padding: 0;
+    overflow: hidden;
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px solid var(--border-color);
+        padding: v.$gap-lg;
+        background-color: var(--bg-secondary);
+
+        h2 {
+            font-size: 1.25rem;
+            text-transform: uppercase;
+            margin: 0;
+            padding-right: v.$gap-md;
+        }
+    }
+
+    .modal-body {
+        padding: v.$gap-lg;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: v.$gap-xl;
+
+        /* Custom scrollbar */
+        &::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .summary-block {
+            background-color: var(--bg-primary);
+            border-left: 4px solid var(--accent);
+            padding: v.$gap-md;
+
+            label {
+                display: block;
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: var(--text-secondary);
+                text-transform: uppercase;
+                margin-bottom: 8px;
+            }
+
+            p {
+                margin: 0;
+                font-size: 0.95rem;
+                line-height: 1.5;
+                color: var(--text-primary);
+            }
+        }
+
+        // NEW 2-COLUMN STRUCTURE
+        .modal-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: v.$gap-xl;
+            align-items: start; // Prevents the columns from stretching vertically to match each other
+
+            .column {
+                display: flex;
+                flex-direction: column;
+                gap: v.$gap-xl;
+            }
+        }
+    }
+
+    .modal-section {
+        h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 4px;
+            margin-bottom: v.$gap-md;
+            letter-spacing: 0.5px;
+        }
+    }
+
+    .modal-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: v.$gap-md;
+
+        .data-group {
+            display: flex;
+            flex-direction: column;
+
+            &.full-width {
+                grid-column: 1 / -1;
+            }
+
+            label {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: var(--text-secondary);
+                text-transform: uppercase;
+                margin-bottom: 4px;
+            }
+
+            p {
+                font-size: 0.95rem;
+                color: var(--text-primary);
+                margin: 0;
+                word-wrap: break-word;
+            }
+
+            a {
+                font-size: 0.95rem;
+                color: var(--accent);
+                text-decoration: none;
+                font-weight: 500;
+                display: inline-block;
+                width: max-content;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+        }
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: v.$gap-md;
+        padding: v.$gap-md v.$gap-lg;
+        border-top: 1px solid var(--border-color);
+        background-color: var(--bg-secondary);
+
+        button {
+            padding: v.$gap-sm v.$gap-md;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: v.$radius-none;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+
+            &:hover {
+                color: var(--text-primary);
+            }
+        }
+
+        .edit-btn {
+            background-color: var(--accent);
+            color: var(--bg-secondary);
+            border: 2px solid var(--accent);
+
+            &:hover {
+                background-color: transparent;
+                color: var(--accent);
+            }
+        }
+    }
+}

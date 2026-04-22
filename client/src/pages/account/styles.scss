@@ -1,0 +1,86 @@
+@use "../../styles/variables" as v;
+
+.account-wrapper {
+    padding: v.$gap-lg;
+
+    h1 {
+        margin-bottom: v.$gap-lg;
+    }
+
+    .form-card {
+        max-width: 600px;
+
+        h3 {
+            font-size: 1.1rem;
+            margin-bottom: v.$gap-lg;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: v.$gap-sm;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: v.$gap-md;
+
+            .row {
+                display: flex;
+                gap: v.$gap-md;
+
+                .input-group {
+                    flex: 1;
+                }
+            }
+
+            .input-group {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+
+                label {
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    text-transform: uppercase;
+                }
+
+                input {
+                    padding: v.$gap-sm v.$gap-md;
+                    background-color: var(--bg-primary);
+                    border: 1px solid var(--border-color);
+                    color: var(--text-primary);
+                    border-radius: v.$radius-none;
+                    font-size: 1rem;
+                    transition: border-color 0.2s ease;
+
+                    &:focus {
+                        outline: none;
+                        border-color: var(--accent);
+                    }
+                }
+            }
+
+            .save-btn {
+                margin-top: v.$gap-sm;
+                padding: v.$gap-md;
+                background-color: var(--accent);
+                color: var(--bg-secondary);
+                border: 2px solid var(--accent);
+                border-radius: v.$radius-none;
+                font-weight: 600;
+                text-transform: uppercase;
+                cursor: pointer;
+                transition: all 0.2s ease;
+
+                &:hover:not(:disabled) {
+                    background-color: transparent;
+                    color: var(--accent);
+                }
+
+                &:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                }
+            }
+        }
+    }
+}

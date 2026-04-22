@@ -1,0 +1,44 @@
+@use "../../styles/variables" as v;
+
+.page-loader-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* Take up the full screen minus the navbar height */
+    min-height: calc(100vh - v.$nav-height);
+    background-color: var(--bg-primary);
+}
+
+.loader {
+    width: 12px;
+    height: 12px;
+    display: block;
+    position: relative;
+    color: var(--accent);
+    /* Adapts to light/dark mode automatically */
+    box-sizing: border-box;
+    animation: animloader 1.25s linear infinite alternate;
+}
+
+@keyframes animloader {
+    0% {
+        box-shadow: 14px 0 0 -2px, 38px 0 0 -2px, -14px 0 0 -2px, -38px 0 0 -2px;
+    }
+
+    25% {
+        box-shadow: 14px 0 0 -2px, 38px 0 0 -2px, -14px 0 0 -2px, -38px 0 0 2px;
+    }
+
+    50% {
+        box-shadow: 14px 0 0 -2px, 38px 0 0 -2px, -14px 0 0 2px, -38px 0 0 -2px;
+    }
+
+    75% {
+        box-shadow: 14px 0 0 2px, 38px 0 0 -2px, -14px 0 0 -2px, -38px 0 0 -2px;
+    }
+
+    100% {
+        box-shadow: 14px 0 0 -2px, 38px 0 0 2px, -14px 0 0 -2px, -38px 0 0 -2px;
+    }
+}

@@ -1,0 +1,122 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
+import './styles.scss';
+
+export const Account = () => {
+  const { user, profile, refreshProfile } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    username: '',
+    first_name: '',
+    last_name: '',
+    company: '',
+    phone: '',
+    business_phone: '',
+  });
+
+  // Pre-fill the form when the profile loads
+  useEffect(() => {
+    if (profile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData({
+        username: profile.username || '',
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
+        company: profile.company || '',
+        phone: profile.phone || '',
+        business_phone: profile.business_phone || '',
+      });
+    }
+  }, [profile]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await supabase.from('profiles').update(formData).eq('id', user?.id);
+
+    if (error) {
+      alert(error.message);
+    } else {
+      await refreshProfile(); // Refresh context so navbar/other components update
+      alert('Account information updated successfully.');
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="account-wrapper">
+      <h1>Account</h1>
+
+      <div className="geometric-container form-card">
+        <h3>Profile Details</h3>
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label>Username</label>
+            <input
+              required
+              type="text"
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            />
+          </div>
+
+          <div className="row">
+            <div className="input-group">
+              <label>First Name</label>
+              <input
+                required
+                type="text"
+                value={formData.first_name}
+                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+              />
+            </div>
+            <div className="input-group">
+              <label>Last Name</label>
+              <input
+                required
+                type="text"
+                value={formData.last_name}
+                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="input-group">
+            <label>Company</label>
+            <input
+              required
+              type="text"
+              value={formData.company}
+              onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+            />
+          </div>
+
+          <div className="row">
+            <div className="input-group">
+              <label>Phone</label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              />
+            </div>
+            <div className="input-group">
+              <label>Business Phone</label>
+              <input
+                type="tel"
+                value={formData.business_phone}
+                onChange={(e) => setFormData({ ...formData, business_phone: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <button type="submit" disabled={loading} className="save-btn">
+            {loading ? 'Saving...' : 'Save Changes'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};

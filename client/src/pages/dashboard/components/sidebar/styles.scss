@@ -1,0 +1,261 @@
+@use "../../../../styles/variables" as v;
+
+.dashboard-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+
+    // Custom scrollbar
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+    }
+
+    .sidebar-section {
+        padding: v.$gap-lg;
+        border-bottom: 1px solid var(--border-color);
+
+        h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: v.$gap-md;
+            letter-spacing: 0.5px;
+        }
+    }
+
+    // --- BUTTONS & ACTIONS ---
+    .geometric-sync-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px v.$gap-md;
+        background-color: var(--accent);
+        border: 2px solid var(--accent);
+        border-radius: v.$radius-none;
+        color: var(--bg-primary);
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative; // Needed for absolute loader overlay
+
+        /* NEW: Flex container for the text and triangle */
+        .btn-text {
+            display: flex;
+            align-items: center;
+            gap: v.$gap-sm;
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+
+        /* NEW: Centers the loader */
+        .loader-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .triangle-icon {
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 10px solid var(--bg-primary);
+            transition: border-color 0.3s ease;
+        }
+
+        &:hover:not(:disabled) {
+            background-color: transparent;
+            color: var(--accent);
+
+            .triangle-icon {
+                border-left-color: var(--accent);
+            }
+        }
+
+        &.syncing {
+            cursor: not-allowed;
+
+            .btn-text {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+    }
+
+    .warning-box {
+        font-size: 0.8rem;
+        color: #f59e0b;
+        border: 1px solid #f59e0b;
+        padding: v.$gap-sm;
+        text-align: center;
+    }
+
+    // --- SWITCH TOGGLE ---
+    .view-toggle {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: v.$gap-lg;
+
+        .toggle-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+
+            input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            .slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: var(--bg-primary);
+                border: 1px solid var(--border-color);
+                transition: .2s ease;
+                border-radius: v.$radius-none; // Kept sharp and geometric
+
+                &:before {
+                    position: absolute;
+                    content: "";
+                    height: 16px;
+                    width: 16px;
+                    left: 3px;
+                    bottom: 3px;
+                    background-color: var(--text-secondary);
+                    transition: .2s ease;
+                    border-radius: v.$radius-none;
+                }
+            }
+
+            input:checked+.slider {
+                background-color: var(--accent);
+                border-color: var(--accent);
+            }
+
+            input:checked+.slider:before {
+                transform: translateX(20px);
+                background-color: var(--bg-primary);
+            }
+        }
+    }
+
+    // --- SEARCH ---
+    .sidebar-input {
+        width: 100%;
+        padding: 10px v.$gap-sm;
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: v.$radius-none;
+        font-size: 0.9rem;
+        font-family: inherit;
+
+        &:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+    }
+
+    // --- STATS ---
+    .stat-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+
+            &.text-accent {
+                color: var(--accent);
+            }
+        }
+    }
+
+    // --- CHECKBOXES ---
+    .checkbox-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            user-select: none;
+
+            input {
+                display: none; // Hide default checkbox
+            }
+
+            .custom-checkbox {
+                width: 16px;
+                height: 16px;
+                border: 1px solid var(--border-color);
+                background-color: var(--bg-primary);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                transition: all 0.1s ease;
+            }
+
+            input:checked+.custom-checkbox {
+                background-color: var(--accent);
+                border-color: var(--accent);
+
+                &::after {
+                    content: '';
+                    width: 4px;
+                    height: 8px;
+                    border: solid var(--bg-primary);
+                    border-width: 0 2px 2px 0;
+                    transform: rotate(45deg);
+                    margin-bottom: 2px;
+                }
+            }
+        }
+    }
+}

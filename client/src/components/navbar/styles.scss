@@ -1,0 +1,77 @@
+@use "../../styles/variables" as v;
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: v.$nav-height;
+    padding: 0 v.$gap-lg;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    .nav-brand {
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: -0.5px;
+        text-decoration: none;
+        color: var(--text-primary);
+        text-transform: uppercase;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: v.$gap-lg;
+        height: 100%;
+        align-items: center;
+
+        a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            position: relative;
+            border-bottom: 2px solid transparent;
+
+            &:hover {
+                color: var(--text-primary);
+            }
+
+            &.active {
+                color: var(--text-primary);
+                border-bottom: 2px solid var(--accent);
+            }
+        }
+    }
+
+    .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: v.$gap-md;
+
+        .logout-btn {
+            padding: v.$gap-sm v.$gap-md;
+            background-color: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: v.$radius-none;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:hover {
+                border-color: var(--accent);
+                background-color: var(--accent);
+                color: var(--bg-secondary);
+            }
+        }
+    }
+}

@@ -1,0 +1,102 @@
+@use "../../styles/variables" as v;
+
+.dashboard-wrapper {
+    display: flex;
+    flex-direction: row; // Shift to horizontal layout
+    height: calc(100dvh - v.$nav-height);
+    overflow: hidden;
+    background-color: var(--bg-primary);
+
+    .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0; // Prevents flex child from blowing out width
+    }
+
+    .bids-container {
+        flex: 1;
+        overflow: auto;
+        background-color: var(--table-bg);
+
+        /* Custom scrollbar */
+        &::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .bids-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            white-space: nowrap;
+
+            th,
+            td {
+                padding: v.$gap-md;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            th {
+                text-transform: uppercase;
+                font-size: 0.8rem;
+                font-weight: 600;
+                color: var(--text-secondary);
+                background-color: var(--bg-secondary);
+                letter-spacing: 0.5px;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                box-shadow: 0 1px 0 var(--border-color);
+
+                &.sortable-header {
+                    cursor: pointer;
+                    user-select: none;
+                    transition: color 0.2s ease, background-color 0.2s ease;
+
+                    &:hover {
+                        color: var(--text-primary);
+                        background-color: var(--bg-primary);
+                    }
+
+                    .sort-indicator {
+                        margin-left: v.$gap-xs;
+                        font-size: 0.65rem;
+                        color: var(--accent);
+                        vertical-align: middle;
+                    }
+                }
+            }
+
+            tr {
+                transition: background-color 0.2s ease;
+
+                &.clickable-row {
+                    cursor: pointer;
+                }
+
+                &:hover {
+                    background-color: var(--bg-secondary);
+                }
+            }
+
+            .fw-bold {
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .text-right {
+                text-align: right;
+            }
+        }
+    }
+}
