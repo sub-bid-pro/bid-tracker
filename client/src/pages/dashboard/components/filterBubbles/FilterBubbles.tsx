@@ -5,6 +5,7 @@ interface Props {
   clearSearch: () => void;
   selectedStatuses: string[];
   removeStatus: (status: string) => void;
+  clearAll: () => void; // <-- ADD PROP
 }
 
 export const FilterBubbles = ({
@@ -12,8 +13,13 @@ export const FilterBubbles = ({
   clearSearch,
   selectedStatuses,
   removeStatus,
+  clearAll, // <-- DESTRUCTURE PROP
 }: Props) => {
   if (!searchTerm && selectedStatuses.length === 0) return null;
+
+  // Optional: Only show "Clear All" if there are at least 2 filters active
+  // so it doesn't just duplicate the single "x" button functionality.
+  const activeFilterCount = (searchTerm ? 1 : 0) + selectedStatuses.length;
 
   return (
     <div className="filter-bubbles-container">
@@ -36,6 +42,13 @@ export const FilterBubbles = ({
           </button>
         </div>
       ))}
+
+      {/* CLEAR ALL BUTTON */}
+      {activeFilterCount > 1 && (
+        <button className="clear-all-btn" onClick={clearAll}>
+          Clear All
+        </button>
+      )}
     </div>
   );
 };

@@ -112,6 +112,10 @@ export const Dashboard = () => {
           clearSearch={() => setSearchTerm('')}
           selectedStatuses={selectedStatuses}
           removeStatus={toggleStatus}
+          clearAll={() => {
+            setSearchTerm('');
+            setSelectedStatuses([]);
+          }}
         />
 
         <div className="bids-container">
