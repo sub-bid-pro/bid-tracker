@@ -1,22 +1,33 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './styles.scss';
 import { ButtonLoader } from '../../components/buttonLoader/ButtonLoader';
 
 export const Auth = () => {
-  // 1. Pull session and profile from context to determine routing
   const { session, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [localLoading, setLocalLoading] = useState(false);
 
   const isProcessing = localLoading || authLoading;
 
-  // 2. Automatically route the user once the context is fully loaded
+  // Catch expired links from Supabase
+  useEffect(() => {
+    const hash = location.hash;
+    if (hash && hash.includes('error=')) {
+      alert('This magic link has expired or is invalid. Please log in or sign up again.');
+      // Clean up the URL so it doesn't get stuck in a loop
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, [location]);
+
+  // Route automatically if successfully authenticated
   useEffect(() => {
     if (session && !authLoading) {
       if (profile?.onboarding_complete) {
@@ -29,6 +40,12 @@ export const Auth = () => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isLogin && password !== confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
+
     setLocalLoading(true);
 
     const { error } = isLogin
@@ -36,16 +53,24 @@ export const Auth = () => {
       : await supabase.auth.signUp({ email, password });
 
     if (error) {
-      alert(error.message);
+      // Handle the specific Edge Cases
+      if (error.message.includes('already registered')) {
+        alert('This email is already registered! Please log in instead.');
+        setIsLogin(true); // Flip them to the login screen
+        setPassword('');
+        setConfirmPassword('');
+      } else if (error.message.includes('Email not confirmed')) {
+        alert('Please confirm your email address before logging in. Check your inbox!');
+      } else {
+        alert(error.message); // Fallback for wrong passwords, etc.
+      }
       setLocalLoading(false);
     } else if (!isLogin) {
-      // For sign-ups, alert the user and stop the local loader
       alert('Check your email for confirmation!');
       setLocalLoading(false);
+      setPassword('');
+      setConfirmPassword('');
     }
-    // 3. Notice we do NOTHING on a successful login.
-    // localLoading remains true, keeping the button spinning.
-    // AuthContext takes over, fetches the profile, and then the useEffect above handles the routing.
   };
 
   return (
@@ -66,11 +91,19 @@ export const Auth = () => {
               required
             />
           </div>
+          {!isLogin && (
+            <div className="input-group">
+              <label>Confirm Password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required={!isLogin}
+              />
+            </div>
+          )}
           <button type="submit" disabled={isProcessing} className={isProcessing ? 'loading' : ''}>
-            {/* The text stays in the DOM to keep the height structure */}
             <span className="btn-text">{isLogin ? 'Enter' : 'Create Account'}</span>
-
-            {/* The loader floats absolutely over the center */}
             {isProcessing && (
               <span className="loader-overlay">
                 <ButtonLoader />
@@ -79,7 +112,13 @@ export const Auth = () => {
           </button>
         </form>
         <p className="toggle-auth">
-          <span onClick={() => setIsLogin(!isLogin)}>
+          <span
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setPassword('');
+              setConfirmPassword('');
+            }}
+          >
             {isLogin ? 'Need an account? Sign Up' : 'Have an account? Login'}
           </span>
         </p>

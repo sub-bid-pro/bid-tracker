@@ -6,9 +6,11 @@ export const Settings = () => {
   const { user, profile, refreshProfile } = useAuth();
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
   const handleConnectGmail = () => {
     if (!user) return alert('You must be logged in to connect Gmail.');
-    window.location.href = `http://localhost:5001/api/auth/google?userId=${user.id}`;
+    window.location.href = `${API_URL}/api/auth/google?userId=${user.id}`;
   };
 
   const handleDisconnectGmail = async () => {
@@ -16,7 +18,7 @@ export const Settings = () => {
     setIsDisconnecting(true);
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/google/disconnect', {
+      const response = await fetch(`${API_URL}/api/auth/google/disconnect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id }),

@@ -1,5 +1,3 @@
-// bid-tracker/client/src/components/protectedRoute/ProtectedRoute.tsx
-
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { PageLoader } from '../pageLoader/PageLoader';
@@ -7,24 +5,26 @@ import { PageLoader } from '../pageLoader/PageLoader';
 export const ProtectedRoute = ({ requireProfile = true }) => {
   const { session, profile, loading } = useAuth();
 
-  // This prevents the screen from flashing during background token refreshes.
-  if ((loading && !profile) || (session && !profile)) {
+  // 1. Only block the screen if AuthContext is actively fetching data
+  if (loading) {
     return <PageLoader />;
   }
 
+  // 2. Not logged in at all?
   if (!session) {
     return <Navigate to="/auth" replace />;
   }
 
-  // LOGIC FOR ONBOARDING (requireProfile={true})
+  // 3. Needs a profile but hasn't completed onboarding?
   if (requireProfile && !profile?.onboarding_complete) {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // LOGIC FOR DASHBOARD/SETTINGS PAGE (requireProfile={false})
+  // 4. On the onboarding page, but already finished it?
   if (!requireProfile && profile?.onboarding_complete) {
     return <Navigate to="/" replace />;
   }
 
+  // 5. Passed all checks, render the page
   return <Outlet />;
 };

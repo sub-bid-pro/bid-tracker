@@ -1,4 +1,5 @@
 import { ButtonLoader } from '../../../../../components/buttonLoader/ButtonLoader';
+import { useAuth } from '../../../../../contexts/AuthContext';
 
 interface Props {
   isSyncing: boolean;
@@ -15,6 +16,14 @@ export const SidebarActions = ({
   isFullView,
   setIsFullView,
 }: Props) => {
+  const { user } = useAuth();
+
+  const handleConnectGmail = () => {
+    if (!user) return alert('You must be logged in to connect Gmail.');
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    window.location.href = `${API_URL}/api/auth/google?userId=${user.id}`;
+  };
+
   return (
     <div className="sidebar-section">
       {gmailConnected ? (
@@ -23,13 +32,11 @@ export const SidebarActions = ({
           onClick={handleSync}
           disabled={isSyncing}
         >
-          {/* Keep the triangle and text together in the invisible wrapper */}
           <span className="btn-text">
             <div className="triangle-icon" />
             PULL NEW BIDS
           </span>
 
-          {/* Loader sits on top */}
           {isSyncing && (
             <span className="loader-overlay">
               <ButtonLoader />
@@ -37,7 +44,9 @@ export const SidebarActions = ({
           )}
         </button>
       ) : (
-        <div className="warning-box">Connect Gmail in Settings to pull bids.</div>
+        <button className="geometric-sync-btn" onClick={handleConnectGmail}>
+          <span className="btn-text">CONNECT GMAIL</span>
+        </button>
       )}
 
       {/* True Switch Toggle for View Mode */}

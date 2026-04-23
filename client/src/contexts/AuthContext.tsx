@@ -33,37 +33,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchProfile = async (userId: string) => {
     setLoading(true);
 
-    // 1. Create a promise that resolves after 1 second
-    const bufferTimeout = new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // 1. Create a promise that resolves after 1 second to prevent UI flashing
+      const bufferTimeout = new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // 2. Start the Supabase fetch
-    const fetchPromise = supabase
-      .from('profiles')
-      .select('*, onboarding_complete')
-      .eq('id', userId)
-      .single();
+      // 2. Start the Supabase fetch
+      const fetchPromise = supabase
+        .from('profiles')
+        .select('*, onboarding_complete')
+        .eq('id', userId)
+        .single();
 
-    // 3. Wait for BOTH the data and the 1-second timer to finish
-    const [profileResponse] = await Promise.all([fetchPromise, bufferTimeout]);
+      // 3. Wait for BOTH the data and the 1-second timer to finish
+      const [profileResponse] = await Promise.all([fetchPromise, bufferTimeout]);
 
-    if (profileResponse.data) {
-      setProfile(profileResponse.data);
-    }
+      // Supabase returns PGRST116 if no rows are found (normal for new users before onboarding)
+      if (profileResponse.error && profileResponse.error.code !== 'PGRST116') {
+        console.error('Error fetching profile:', profileResponse.error);
+      }
 
-    setTimeout(() => {
+      if (profileResponse.data) {
+        setProfile(profileResponse.data);
+      } else {
+        setProfile(null);
+      }
+    } catch (error) {
+      console.error('Unexpected error during profile fetch:', error);
+    } finally {
+      // CRITICAL SAFETY NET: This guarantees the loading screen drops no matter what happens
       setLoading(false);
-    }, 500);
+    }
   };
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Error getting session:', error);
+        setLoading(false); // Stop loading if session check fails entirely
+        return;
+      }
+
       setSession(session);
       setUser(session?.user || null);
-      if (session?.user) fetchProfile(session.user.id);
-      else setLoading(false);
+
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setLoading(false); // Stop loading if no user is found
+      }
     });
 
     const {
@@ -76,9 +96,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
         if (session?.user) {
           fetchProfile(session.user.id);
+        } else {
+          setLoading(false); // Safety drop
         }
       } else if (event === 'SIGNED_OUT') {
         setProfile(null);
+        setLoading(false); // CRITICAL: Stop loading when explicitly signed out
+      } else {
+        // Drop the loading state for any unhandled auth events
+        setLoading(false);
       }
     });
 

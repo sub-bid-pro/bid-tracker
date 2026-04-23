@@ -21,7 +21,13 @@ export const Onboarding = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.from('profiles').insert([{ id: user?.id, ...formData }]);
+    const { error } = await supabase.from('profiles').insert([
+      {
+        id: user?.id,
+        ...formData,
+        onboarding_complete: true,
+      },
+    ]);
 
     if (error) {
       alert(error.message);
