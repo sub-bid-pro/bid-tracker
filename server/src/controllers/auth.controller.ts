@@ -43,8 +43,10 @@ export const handleGoogleCallback = async (req: Request, res: Response) => {
       .eq('id', userId);
 
     syncUserBids(userId);
-    // Send them back to the settings page so they can see the button change
-    res.redirect('http://localhost:5173/settings?status=success');
+
+    // Dynamic Frontend URL
+    const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${FRONTEND_URL}/settings?status=success`);
   } catch (error) {
     console.error('OAuth Callback Error:', error);
     res.redirect('http://localhost:5173/settings?error=oauth_failed');

@@ -48,7 +48,11 @@ export const Dashboard = () => {
     if (!user) return;
     setIsSyncing(true);
     try {
-      const response = await fetch('http://localhost:5001/api/bids/sync', {
+      // 1. Define the dynamic URL
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
+      // 2. Use it in the fetch call using template literals (backticks)
+      const response = await fetch(`${API_URL}/api/bids/sync`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id }),
