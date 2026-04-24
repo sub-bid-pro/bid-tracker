@@ -1,15 +1,20 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import { ButtonLoader } from '../../components/buttonLoader/ButtonLoader';
 import './styles.scss';
 
 export const Settings = () => {
   const { user, profile, refreshProfile } = useAuth();
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false); // New state for connect delay
+  const { showToast } = useToast();
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
   const handleConnectGmail = () => {
-    if (!user) return alert('You must be logged in to connect Gmail.');
+    if (!user) return showToast('You must be logged in to connect Gmail.', 'error');
+    setIsConnecting(true); // Spin the button while the browser handles the redirect
     window.location.href = `${API_URL}/api/auth/google?userId=${user.id}`;
   };
 
@@ -25,13 +30,13 @@ export const Settings = () => {
       });
 
       if (response.ok) {
-        await refreshProfile(); // Refresh context to instantly update the UI
+        await refreshProfile();
       } else {
-        alert('Failed to disconnect account.');
+        showToast('Failed to disconnect account.', 'error');
       }
     } catch (error) {
       console.error('Error disconnecting:', error);
-      alert('Network error while disconnecting.');
+      showToast('Network error while disconnecting.', 'error');
     } finally {
       setIsDisconnecting(false);
     }
@@ -51,13 +56,27 @@ export const Settings = () => {
           <button
             onClick={handleDisconnectGmail}
             disabled={isDisconnecting}
-            className="disconnect-btn"
+            className={`disconnect-btn ${isDisconnecting ? 'loading' : ''}`}
           >
-            {isDisconnecting ? 'Disconnecting...' : 'Disconnect Gmail Account'}
+            <span className="btn-text">Disconnect Gmail Account</span>
+            {isDisconnecting && (
+              <span className="loader-overlay">
+                <ButtonLoader />
+              </span>
+            )}
           </button>
         ) : (
-          <button onClick={handleConnectGmail} className="connect-btn">
-            Connect Gmail Account
+          <button
+            onClick={handleConnectGmail}
+            disabled={isConnecting}
+            className={`connect-btn ${isConnecting ? 'loading' : ''}`}
+          >
+            <span className="btn-text">Connect Gmail Account</span>
+            {isConnecting && (
+              <span className="loader-overlay">
+                <ButtonLoader />
+              </span>
+            )}
           </button>
         )}
       </div>

@@ -1,5 +1,6 @@
 import { ButtonLoader } from '../../../../../components/buttonLoader/ButtonLoader';
 import { useAuth } from '../../../../../contexts/AuthContext';
+import { useToast } from '../../../../../contexts/ToastContext';
 
 interface Props {
   isSyncing: boolean;
@@ -17,9 +18,10 @@ export const SidebarActions = ({
   setIsFullView,
 }: Props) => {
   const { user } = useAuth();
+  const { showToast } = useToast();
 
   const handleConnectGmail = () => {
-    if (!user) return alert('You must be logged in to connect Gmail.');
+    if (!user) return showToast('You must be logged in to connect Gmail.', 'warning');
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
     window.location.href = `${API_URL}/api/auth/google?userId=${user.id}`;
   };

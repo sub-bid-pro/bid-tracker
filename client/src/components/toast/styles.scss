@@ -1,0 +1,159 @@
+@use '../../styles/variables' as vars;
+@use '../../styles/colors' as colors;
+
+.toast-container {
+  position: fixed;
+  bottom: vars.$gap-lg;
+  right: vars.$gap-lg;
+  min-width: 320px;
+  max-width: 450px;
+  padding: vars.$gap-md vars.$gap-lg;
+  border-radius: vars.$radius-sm;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 9999;
+
+  /* ENTRY ANIMATION */
+  animation: slide-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  /* EXIT ANIMATION CLASS (Slowed down to 0.5s) */
+  &.closing {
+    animation: slide-out 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* PAUSE CSS ANIMATION WHEN STATE IS PAUSED */
+  &.paused {
+    .toast-progress {
+      animation-play-state: paused;
+    }
+  }
+
+  &.success {
+    border-top: 3px solid #10b981;
+
+    .toast-progress {
+      background: #10b981;
+    }
+  }
+
+  &.error {
+    border-top: 3px solid #ef4444;
+
+    .toast-progress {
+      background: #ef4444;
+    }
+  }
+
+  &.info {
+    border-top: 3px solid #3b82f6;
+
+    .toast-progress {
+      background: #3b82f6;
+    }
+  }
+
+  &.warning {
+    border-top: 3px solid #f59e0b;
+
+    .toast-progress {
+      background: #f59e0b;
+    }
+  }
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: vars.$gap-md;
+}
+
+.toast-message {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  flex: 1;
+  /* Pushes buttons to the right */
+}
+
+/* BUTTON STYLES */
+.toast-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  .toast-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: vars.$radius-sm;
+    transition: all 0.2s ease;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover {
+      color: var(--text-primary);
+      background: var(--bg-primary);
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  animation: progress linear forwards;
+}
+
+/* KEYFRAMES */
+@keyframes slide-in {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+@keyframes progress {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
+}

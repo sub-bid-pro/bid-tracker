@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './styles.scss';
 import { ButtonLoader } from '../../components/buttonLoader/ButtonLoader';
+import { useToast } from '../../contexts/ToastContext';
 
 export const Auth = () => {
   const { session, profile, loading: authLoading } = useAuth();
@@ -14,6 +15,7 @@ export const Auth = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [localLoading, setLocalLoading] = useState(false);
+  const { showToast } = useToast();
 
   const isProcessing = localLoading || authLoading;
 
@@ -21,7 +23,7 @@ export const Auth = () => {
   useEffect(() => {
     const hash = location.hash;
     if (hash && hash.includes('error=')) {
-      alert('This magic link has expired or is invalid. Please log in or sign up again.');
+      showToast('This magic link has expired or is invalid. Please log in or sign up again.');
       // Clean up the URL so it doesn't get stuck in a loop
       window.history.replaceState(null, '', window.location.pathname);
     }
@@ -42,7 +44,7 @@ export const Auth = () => {
     e.preventDefault();
 
     if (!isLogin && password !== confirmPassword) {
-      alert('Passwords do not match!');
+      showToast('Passwords do not match!');
       return;
     }
 
@@ -55,18 +57,18 @@ export const Auth = () => {
     if (error) {
       // Handle the specific Edge Cases
       if (error.message.includes('already registered')) {
-        alert('This email is already registered! Please log in instead.');
+        showToast('This email is already registered! Please log in instead.');
         setIsLogin(true); // Flip them to the login screen
         setPassword('');
         setConfirmPassword('');
       } else if (error.message.includes('Email not confirmed')) {
-        alert('Please confirm your email address before logging in. Check your inbox!');
+        showToast('Please confirm your email address before logging in. Check your inbox!');
       } else {
-        alert(error.message); // Fallback for wrong passwords, etc.
+        showToast(error.message); // Fallback for wrong passwords, etc.
       }
       setLocalLoading(false);
     } else if (!isLogin) {
-      alert('Check your email for confirmation!');
+      showToast('Check your email for confirmation!');
       setLocalLoading(false);
       setPassword('');
       setConfirmPassword('');

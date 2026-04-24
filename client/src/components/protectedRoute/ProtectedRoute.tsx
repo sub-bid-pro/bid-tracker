@@ -6,7 +6,9 @@ export const ProtectedRoute = ({ requireProfile = true }) => {
   const { session, profile, loading } = useAuth();
 
   // 1. Only block the screen if AuthContext is actively fetching data
-  if (loading) {
+  // AND we don't have a profile yet (initial load).
+  // If we already have a profile, let the component's button loaders handle it!
+  if (loading && !profile) {
     return <PageLoader />;
   }
 

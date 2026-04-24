@@ -27,8 +27,36 @@
             padding: v.$gap-md;
             font-weight: 600;
             text-transform: uppercase;
-            border-radius: v.$radius-none; // Keep it sharp
+            border-radius: v.$radius-none;
             transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            .btn-text {
+                opacity: 1;
+                transition: opacity 0.2s ease;
+            }
+
+            .loader-overlay {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            &.loading {
+                cursor: not-allowed;
+
+                .btn-text {
+                    opacity: 0;
+                    visibility: hidden;
+                }
+            }
 
             &.connect-btn {
                 background-color: var(--accent);

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import { supabase } from '../../lib/supabase';
 import { BidDetailModal } from './components/bidDetailModal/BidDetailModal';
 import { Sidebar } from './components/sidebar/Sidebar';
@@ -10,6 +11,7 @@ import { StatusBadge } from '../../components/statusBadge/StatusBadge';
 
 export const Dashboard = () => {
   const { user, profile } = useAuth();
+  const { showToast } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bids, setBids] = useState<any[]>([]);
@@ -58,7 +60,7 @@ export const Dashboard = () => {
         body: JSON.stringify({ userId: user.id }),
       });
       if (response.ok) await fetchBids();
-      else alert('Sync failed.');
+      else showToast('Sync failed.', 'error');
     } catch (error) {
       console.error('Error syncing:', error);
     } finally {

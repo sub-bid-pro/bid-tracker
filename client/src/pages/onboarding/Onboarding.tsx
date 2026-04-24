@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import './styles.scss';
 
 export const Onboarding = () => {
   const { user, refreshProfile } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -30,7 +32,7 @@ export const Onboarding = () => {
     ]);
 
     if (error) {
-      alert(error.message);
+      showToast(error.message, 'error');
       setLoading(false);
     } else {
       await refreshProfile();

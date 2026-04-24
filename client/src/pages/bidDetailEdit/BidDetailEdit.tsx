@@ -3,11 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import './styles.scss';
+import { useToast } from '../../contexts/ToastContext';
 
 export const BidDetailEdit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showToast } = useToast();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -26,7 +28,7 @@ export const BidDetailEdit = () => {
 
       if (error) {
         console.error('Error fetching bid:', error);
-        alert('Could not load bid details.');
+        showToast('Could not load bid details.', 'error');
         navigate('/');
       } else {
         setFormData(data);
@@ -56,10 +58,9 @@ export const BidDetailEdit = () => {
     const { error } = await supabase.from('bids').update(formData).eq('id', id);
 
     if (error) {
-      alert(error.message);
+      showToast(error.message, 'error');
     } else {
-      alert('Bid details saved!');
-      navigate('/');
+      showToast('Bid details saved!', 'success');
     }
     setSaving(false);
   };

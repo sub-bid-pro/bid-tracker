@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import { supabase } from '../../lib/supabase';
+import { ButtonLoader } from '../../components/buttonLoader/ButtonLoader';
 import './styles.scss';
 
 export const Account = () => {
   const { user, profile, refreshProfile } = useAuth();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
@@ -37,10 +40,10 @@ export const Account = () => {
     const { error } = await supabase.from('profiles').update(formData).eq('id', user?.id);
 
     if (error) {
-      alert(error.message);
+      showToast(error.message, 'error');
     } else {
       await refreshProfile(); // Refresh context so navbar/other components update
-      alert('Account information updated successfully.');
+      showToast('Account information updated successfully.', 'success');
     }
     setLoading(false);
   };
@@ -112,8 +115,17 @@ export const Account = () => {
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="save-btn">
-            {loading ? 'Saving...' : 'Save Changes'}
+          <button
+            type="submit"
+            disabled={loading}
+            className={`save-btn ${loading ? 'loading' : ''}`}
+          >
+            <span className="btn-text">Save Changes</span>
+            {loading && (
+              <span className="loader-overlay">
+                <ButtonLoader />
+              </span>
+            )}
           </button>
         </form>
       </div>
