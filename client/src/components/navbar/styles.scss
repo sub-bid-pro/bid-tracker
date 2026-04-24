@@ -49,29 +49,4 @@
             }
         }
     }
-
-    .nav-actions {
-        display: flex;
-        align-items: center;
-        gap: v.$gap-md;
-
-        .logout-btn {
-            padding: v.$gap-sm v.$gap-md;
-            background-color: transparent;
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            border-radius: v.$radius-none;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s ease;
-
-            &:hover {
-                border-color: var(--accent);
-                background-color: var(--accent);
-                color: var(--bg-secondary);
-            }
-        }
-    }
 }

@@ -1,28 +1,199 @@
 @use "../../styles/variables" as v;
 
 .settings-wrapper {
-    padding: v.$gap-lg;
+    width: 100%;
+    /* Ensure the wrapper stretches to at least the bottom of the screen */
+    min-height: calc(100vh - v.$nav-height);
 
-    h1 {
-        margin-bottom: v.$gap-lg;
+    .settings-layout {
+        display: flex;
+        min-height: calc(100vh - v.$nav-height);
+
+        @media (max-width: 768px) {
+            flex-direction: column;
+        }
     }
 
-    .integration-card {
+    /* 1. SIDEBAR ALL THE WAY LEFT & FULL HEIGHT */
+    .settings-sidebar {
+        flex: 0 0 240px;
+        position: sticky;
+        /* Stick exactly under the nav */
+        top: v.$nav-height;
+        /* Span exactly the remaining screen height */
+        height: calc(100vh - v.$nav-height);
+
+        border-right: solid 1px var(--border-color);
+        /* Padding handled inside the sidebar now */
+        padding: v.$gap-xl v.$gap-md v.$gap-xl v.$gap-lg;
+
+        nav {
+            display: flex;
+            flex-direction: column;
+            gap: v.$gap-xs;
+            height: 100%;
+
+            .nav-item {
+                background: transparent;
+                border: none;
+                text-align: left;
+                padding: v.$gap-sm v.$gap-md;
+                font-size: 0.95rem;
+                font-weight: 500;
+                color: var(--text-secondary);
+                cursor: pointer;
+                border-left: 2px solid transparent;
+                transition: all 0.2s ease;
+
+                &:hover {
+                    color: var(--text-primary);
+                    background: var(--bg-primary);
+                }
+
+                &.active {
+                    color: var(--accent);
+                    border-left-color: var(--accent);
+                    background: var(--bg-primary);
+                    font-weight: 600;
+                }
+            }
+        }
+    }
+
+    /* 2. MAIN CONTENT STACKED & CENTERED */
+    .settings-content {
+        flex: 1;
+        display: flex;
+        /* This perfectly centers the inner container! */
+        justify-content: center;
+        padding: v.$gap-md v.$gap-lg v.$gap-xl v.$gap-lg;
+
+        .settings-content-inner {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+
+            .settings-header {
+                width: 100%;
+                border-bottom: solid 1px var(--border-color);
+                margin-bottom: 24px;
+
+                h1 {
+                    padding: 16px;
+                }
+            }
+
+
+            .settings-components-container {
+                display: flex;
+                flex-direction: column;
+                gap: v.$gap-xl;
+                padding: 0 v.$gap-xl;
+
+                .settings-section {
+                    scroll-margin-top: calc(v.$nav-height + v.$gap-lg);
+                }
+            }
+        }
+    }
+
+    /* SHARED CARD STYLES */
+    .settings-card {
         display: flex;
         flex-direction: column;
-        gap: v.$gap-sm;
-        max-width: 500px;
+        gap: v.$gap-md;
 
         h3 {
             font-size: 1.1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: v.$gap-sm;
+            margin-bottom: v.$gap-xs;
         }
 
         p {
             font-size: 0.9rem;
             color: var(--text-secondary);
-            margin-bottom: v.$gap-md;
         }
 
+        /* Form Styles */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: v.$gap-md;
+
+            .row {
+                display: flex;
+                gap: v.$gap-md;
+
+                .input-group {
+                    flex: 1;
+                }
+            }
+
+            .input-group {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+
+                label {
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    text-transform: uppercase;
+                }
+
+                input {
+                    padding: v.$gap-sm v.$gap-md;
+                    background-color: var(--bg-primary);
+                    border: 1px solid var(--border-color);
+                    color: var(--text-primary);
+                    border-radius: v.$radius-none;
+                    font-size: 1rem;
+                    transition: border-color 0.2s ease;
+
+                    &:focus {
+                        outline: none;
+                        border-color: var(--accent);
+                    }
+                }
+            }
+        }
+
+        /* Preference Row Styles */
+        .pref-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .pref-info {
+                h4 {
+                    font-size: 0.95rem;
+                    margin-bottom: 2px;
+                }
+
+                p {
+                    font-size: 0.8rem;
+                    margin: 0;
+                }
+            }
+        }
+
+        .divider {
+            border: 0;
+            height: 1px;
+            background: var(--border-color);
+            margin: v.$gap-sm 0;
+        }
+
+        .integration-btn-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* Shared Button Styles */
         button {
             padding: v.$gap-md;
             font-weight: 600;
@@ -58,32 +229,33 @@
                 }
             }
 
-            &.connect-btn {
+            &.primary-btn {
                 background-color: var(--accent);
                 color: var(--bg-secondary);
                 border: 2px solid var(--accent);
                 cursor: pointer;
+                margin-top: auto;
 
-                &:hover {
-                    background-color: var(--bg-secondary);
+                &:hover:not(:disabled) {
+                    background-color: transparent;
                     color: var(--accent);
+                }
+
+                &:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
                 }
             }
 
-            &.connected-btn {
+            &.danger-btn {
                 background-color: transparent;
-                color: var(--text-secondary);
-                border: 2px solid var(--border-color);
-                cursor: not-allowed;
-            }
-
-            &.disconnect-btn {
-                background-color: transparent;
-                color: #ef4444; // A clean, sharp red
+                color: #ef4444;
                 border: 2px solid #ef4444;
                 cursor: pointer;
+                width: 100%;
+                max-width: 400px;
 
-                &:hover {
+                &:hover:not(:disabled) {
                     background-color: #ef4444;
                     color: var(--bg-secondary);
                 }
@@ -91,6 +263,21 @@
                 &:disabled {
                     opacity: 0.5;
                     cursor: not-allowed;
+                }
+            }
+
+            &.logout-btn {
+                padding: v.$gap-sm v.$gap-md;
+                background-color: transparent;
+                color: var(--text-primary);
+                border: 1px solid var(--border-color);
+                cursor: pointer;
+                font-size: 0.8rem;
+
+                &:hover {
+                    border-color: var(--accent);
+                    background-color: var(--accent);
+                    color: var(--bg-secondary);
                 }
             }
         }
