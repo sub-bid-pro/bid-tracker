@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useToast } from '../../contexts/ToastContext';
 import { supabase } from '../../lib/supabase';
 import { BidDetailModal } from './components/bidDetailModal/BidDetailModal';
 import { Sidebar } from './components/sidebar/Sidebar';
@@ -11,7 +10,6 @@ import { StatusBadge } from '../../components/statusBadge/StatusBadge';
 
 export const Dashboard = () => {
   const { user, profile } = useAuth();
-  const { showToast } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bids, setBids] = useState<any[]>([]);
@@ -22,23 +20,32 @@ export const Dashboard = () => {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(
     null,
   );
-  const [isFullView, setIsFullView] = useState(false); // <-- NEW STATE
+  const [isFullView, setIsFullView] = useState(false);
 
   // Modal State
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedBid, setSelectedBid] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Updated to return the array of data so we can measure it!
   const fetchBids = async () => {
-    if (!user) return;
+    if (!user) return [];
+
     const { data, error } = await supabase
       .from('bids')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (error) console.error('Error fetching bids:', error);
-    else if (data) setBids(data);
+    if (error) {
+      console.error('Error fetching bids:', error);
+      return [];
+    } else if (data) {
+      setBids(data);
+      return data;
+    }
+
+    return [];
   };
 
   useEffect(() => {
@@ -46,23 +53,36 @@ export const Dashboard = () => {
     fetchBids();
   }, [user]);
 
-  const handleSync = async () => {
-    if (!user) return;
+  // Updated to calculate the difference and return it as a Promise<number>
+  const handleSync = async (): Promise<number> => {
+    if (!user) return 0;
     setIsSyncing(true);
+
     try {
-      // 1. Define the dynamic URL
+      // 1. Snapshot the current number of bids before syncing
+      const currentBidsCount = bids.length;
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-      // 2. Use it in the fetch call using template literals (backticks)
+      // 2. Trigger the sync on your backend
       const response = await fetch(`${API_URL}/api/bids/sync`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id }),
       });
-      if (response.ok) await fetchBids();
-      else showToast('Sync failed.', 'error');
+
+      if (!response.ok) {
+        throw new Error('Sync failed on the server.');
+      }
+
+      // 3. Fetch the fresh database list and measure the difference
+      const updatedBids = await fetchBids();
+      const newBidsCount = updatedBids.length - currentBidsCount;
+
+      // 4. Return the result to the Sidebar so it can trigger the correct toast
+      return newBidsCount > 0 ? newBidsCount : 0;
     } catch (error) {
       console.error('Error syncing:', error);
+      throw error; // Re-throw to let SidebarActions catch and display the error toast
     } finally {
       setIsSyncing(false);
     }
@@ -84,7 +104,6 @@ export const Dashboard = () => {
     }
   };
 
-  // Uses our new util function!
   const processedBids = useMemo(() => {
     return filterAndSortBids(bids, searchTerm, selectedStatuses, sortConfig);
   }, [bids, searchTerm, selectedStatuses, sortConfig]);
@@ -139,7 +158,6 @@ export const Dashboard = () => {
                     General Contractor {renderSortIndicator('general_contractor')}
                   </th>
 
-                  {/* EXTRA COLUMNS FOR FULL VIEW */}
                   {isFullView && (
                     <>
                       <th onClick={() => handleSort('gc_contact')} className="sortable-header">
@@ -198,7 +216,6 @@ export const Dashboard = () => {
                       <td className="fw-bold">{bid.job_name}</td>
                       <td>{bid.general_contractor}</td>
 
-                      {/* EXTRA COLUMNS FOR FULL VIEW */}
                       {isFullView && (
                         <>
                           <td>{bid.gc_contact || '--'}</td>
@@ -221,7 +238,6 @@ export const Dashboard = () => {
                   ))
                 ) : (
                   <tr>
-                    {/* Adjust colSpan based on view mode so the empty state stretches all the way across */}
                     <td
                       colSpan={isFullView ? 12 : 5}
                       className="empty-state text-center"

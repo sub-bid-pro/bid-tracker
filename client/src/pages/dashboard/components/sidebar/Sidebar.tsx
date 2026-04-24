@@ -6,7 +6,7 @@ import './styles.scss';
 
 interface Props {
   isSyncing: boolean;
-  handleSync: () => void;
+  handleSync: () => Promise<number>;
   gmailConnected: boolean;
   bidsCount: number;
   needsReviewCount: number;

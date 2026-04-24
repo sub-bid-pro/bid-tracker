@@ -1,5 +1,6 @@
 @use "../../styles/variables" as v;
 
+/* --- TOP NAVBAR --- */
 .navbar {
     display: flex;
     align-items: center;
@@ -12,6 +13,35 @@
     top: 0;
     z-index: 100;
 
+    .nav-left {
+        display: flex;
+        align-items: center;
+    }
+
+    .hamburger {
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        cursor: pointer;
+        padding: v.$gap-sm;
+        margin-left: v.$gap-sm;
+        /* Slight negative margin to align the icon visually with the edge */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: v.$radius-sm;
+        transition: background-color 0.2s ease;
+
+        svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        &:hover {
+            background-color: var(--bg-primary);
+        }
+    }
+
     .nav-brand {
         font-weight: 700;
         font-size: 1.1rem;
@@ -20,32 +50,119 @@
         color: var(--text-primary);
         text-transform: uppercase;
     }
+}
 
-    .nav-links {
+/* --- CLICK-OUTSIDE OVERLAY --- */
+.nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 998;
+
+    /* Default hidden state */
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+
+    &.open {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+/* --- SLIDING DRAWER --- */
+.nav-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    max-width: 80vw;
+    /* Prevents it from taking up the whole screen on tiny phones */
+    height: 100vh;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    z-index: 999;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+
+    /* Default hidden state (slid off to the left) */
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.open {
+        transform: translateX(0);
+    }
+
+    .drawer-header {
         display: flex;
-        gap: v.$gap-lg;
-        height: 100%;
         align-items: center;
+        justify-content: space-between;
+        height: v.$nav-height;
+        border-bottom: 1px solid var(--border-color);
 
-        a {
-            text-decoration: none;
+        .drawer-title {
+            font-weight: 600;
             color: var(--text-secondary);
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: color 0.2s ease;
-            height: 100%;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            padding: 0 v.$gap-lg;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: v.$gap-md;
+            border-radius: v.$radius-sm;
             display: flex;
             align-items: center;
-            position: relative;
-            border-bottom: 2px solid transparent;
+            justify-content: center;
+            transition: all 0.2s ease;
+
+            svg {
+                width: 20px;
+                height: 20px;
+            }
 
             &:hover {
                 color: var(--text-primary);
+                background-color: var(--bg-primary);
+            }
+        }
+    }
+
+    .nav-links {
+        display: flex;
+        flex-direction: column;
+        padding: v.$gap-md 0;
+
+        a {
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 500;
+            padding: v.$gap-md v.$gap-lg;
+            display: flex;
+            align-items: center;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+
+            &:hover {
+                background-color: var(--bg-primary);
             }
 
             &.active {
-                color: var(--text-primary);
-                border-bottom: 2px solid var(--accent);
+                color: var(--accent);
+                border-left-color: var(--accent);
+                background-color: var(--bg-primary);
+                font-weight: 600;
             }
         }
     }
