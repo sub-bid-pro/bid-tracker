@@ -24,13 +24,11 @@ const parseBidEmail = (text: string) => {
   let due_date = null;
   let summary = '';
 
-  // Attempt to grab a message or description (Regex looks for the keyword and grabs the rest of the line)
   const summaryMatch = text.match(/(?:Message|Description|Project Description):\s*(.*?)(?=\r?\n)/i);
   if (summaryMatch) {
     summary = cleanString(summaryMatch[1]);
   }
 
-  // 1. SmartBidNet Parsing Logic
   if (text.includes('smartbidnet.com')) {
     const projMatch = text.match(/Project:\s*(.*?)(?=\r?\n)/);
     if (projMatch) project_name = cleanString(projMatch[1]);
@@ -38,32 +36,24 @@ const parseBidEmail = (text: string) => {
     const dateMatch = text.match(/Due Date:\s*(.*?)(?=\r?\n)/);
     if (dateMatch) due_date = cleanString(dateMatch[1]);
 
-    // Forwarded emails have two "From:" fields.
-    // This grabs all of them, then selects the second one (the actual body sender).
     const fromMatches = [...text.matchAll(/From:\s*(.*?)(?=\r?\n)/g)];
     if (fromMatches.length > 1) {
-      // Replaces the <email@address.com> part with nothing, leaving just the name
       vendor_name = cleanString(fromMatches[1][1].replace(/<.*?>/g, ''));
     } else if (fromMatches.length === 1) {
       vendor_name = cleanString(fromMatches[0][1].replace(/<.*?>/g, ''));
     }
-  }
-  // 2. BuildingConnected Parsing Logic
-  else if (text.includes('buildingconnected.com')) {
+  } else if (text.includes('buildingconnected.com')) {
     const projMatch = text.match(/message about\s*\r?\n\s*(.*?)(?=:|\r?\n)/);
     if (projMatch) project_name = cleanString(projMatch[1]);
 
     const dateMatch = text.match(/Bid Due:\s*(.*?)(?=\r?\n)/);
     if (dateMatch) due_date = cleanString(dateMatch[1]);
 
-    // Grabs everything after "From: " but stops right before the first "<"
     const vendorMatch = text.match(/From:\s*([^<]+)/);
     if (vendorMatch) {
       vendor_name = cleanString(vendorMatch[1]);
     }
-  }
-  // 3. iSqFt Parsing Logic
-  else if (text.includes('isqftmail.com')) {
+  } else if (text.includes('isqftmail.com')) {
     // Placeholder for future logic
   }
 
@@ -127,7 +117,13 @@ export const syncUserBids = async (userId: string) => {
       const rawText = decodeBase64(encodedBody);
       const parsedData = parseBidEmail(rawText);
 
-      // 5. Save the parsed data to Supabase using the new CRM schema
+      // --- NEW: Capture Gmail's internal timestamp ---
+      const internalDate = detail.data.internalDate;
+      const receivedAt = internalDate
+        ? new Date(Number(internalDate)).toISOString()
+        : new Date().toISOString(); // Fallback to current time if missing
+
+      // 5. Save the parsed data to Supabase
       const { error } = await supabaseAdmin.from('bids').insert({
         user_id: userId,
         raw_email_id: msg.id,
@@ -136,6 +132,7 @@ export const syncUserBids = async (userId: string) => {
         bid_due_date: parsedData.due_date,
         summary: parsedData.summary,
         status: 'Needs Review',
+        email_received_at: receivedAt,
       });
 
       if (error) {

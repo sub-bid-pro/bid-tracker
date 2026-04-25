@@ -17,9 +17,12 @@ export const Dashboard = () => {
   // Filtering, Sorting, & View State
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(
-    null,
-  );
+
+  // --- NEW: Set default sort to the new column, descending (newest first) ---
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>({
+    key: 'email_received_at',
+    direction: 'desc',
+  });
   const [isFullView, setIsFullView] = useState(false);
 
   // Modal State
@@ -27,7 +30,6 @@ export const Dashboard = () => {
   const [selectedBid, setSelectedBid] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Updated to return the array of data so we can measure it!
   const fetchBids = async () => {
     if (!user) return [];
 
@@ -35,7 +37,7 @@ export const Dashboard = () => {
       .from('bids')
       .select('*')
       .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+      .order('email_received_at', { ascending: false }); // <-- NEW: Sort the initial DB fetch as well
 
     if (error) {
       console.error('Error fetching bids:', error);
@@ -53,17 +55,14 @@ export const Dashboard = () => {
     fetchBids();
   }, [user]);
 
-  // Updated to calculate the difference and return it as a Promise<number>
   const handleSync = async (): Promise<number> => {
     if (!user) return 0;
     setIsSyncing(true);
 
     try {
-      // 1. Snapshot the current number of bids before syncing
-      const currentBidsCount = bids.length;
+      const existingBidIds = new Set(bids.map((bid) => bid.id));
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-      // 2. Trigger the sync on your backend
       const response = await fetch(`${API_URL}/api/bids/sync`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -74,15 +73,13 @@ export const Dashboard = () => {
         throw new Error('Sync failed on the server.');
       }
 
-      // 3. Fetch the fresh database list and measure the difference
       const updatedBids = await fetchBids();
-      const newBidsCount = updatedBids.length - currentBidsCount;
+      const newBidsAdded = updatedBids.filter((bid) => !existingBidIds.has(bid.id)).length;
 
-      // 4. Return the result to the Sidebar so it can trigger the correct toast
-      return newBidsCount > 0 ? newBidsCount : 0;
+      return newBidsAdded;
     } catch (error) {
       console.error('Error syncing:', error);
-      throw error; // Re-throw to let SidebarActions catch and display the error toast
+      throw error;
     } finally {
       setIsSyncing(false);
     }
@@ -151,6 +148,10 @@ export const Dashboard = () => {
                   <th onClick={() => handleSort('status')} className="sortable-header">
                     Status {renderSortIndicator('status')}
                   </th>
+                  {/* NEW COLUMN HEADER */}
+                  <th onClick={() => handleSort('email_received_at')} className="sortable-header">
+                    Received {renderSortIndicator('email_received_at')}
+                  </th>
                   <th onClick={() => handleSort('job_name')} className="sortable-header">
                     Job Name {renderSortIndicator('job_name')}
                   </th>
@@ -213,6 +214,12 @@ export const Dashboard = () => {
                       <td>
                         <StatusBadge status={bid.status} />
                       </td>
+                      {/* NEW COLUMN DATA */}
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        {bid.email_received_at
+                          ? new Date(bid.email_received_at).toLocaleDateString()
+                          : '--'}
+                      </td>
                       <td className="fw-bold">{bid.job_name}</td>
                       <td>{bid.general_contractor}</td>
 
@@ -239,7 +246,7 @@ export const Dashboard = () => {
                 ) : (
                   <tr>
                     <td
-                      colSpan={isFullView ? 12 : 5}
+                      colSpan={isFullView ? 13 : 6}
                       className="empty-state text-center"
                       style={{ padding: '32px' }}
                     >

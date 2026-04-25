@@ -42,7 +42,7 @@
 
             th,
             td {
-                padding: v.$gap-md;
+                padding: v.$gap-sm v.$gap-lg;
                 border-bottom: 1px solid var(--border-color);
             }
 

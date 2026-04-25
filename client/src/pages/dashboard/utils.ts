@@ -36,6 +36,16 @@ export const filterAndSortBids = (
         return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
       }
 
+      // --- NEW: Handle Date sorting safely ---
+      if (
+        ['email_received_at', 'bid_due_date', 'rfi_due_date', 'award_date'].includes(sortConfig.key)
+      ) {
+        // Fallback to 0 if the date string is empty or invalid
+        const aTime = aVal ? new Date(aVal).getTime() : 0;
+        const bTime = bVal ? new Date(bVal).getTime() : 0;
+        return sortConfig.direction === 'asc' ? aTime - bTime : bTime - aTime;
+      }
+
       // Handle string sorting
       const aStr = String(aVal || '').toLowerCase();
       const bStr = String(bVal || '').toLowerCase();
