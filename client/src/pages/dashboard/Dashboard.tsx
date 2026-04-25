@@ -5,8 +5,8 @@ import { BidDetailModal } from './components/bidDetailModal/BidDetailModal';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { FilterBubbles } from './components/filterBubbles/FilterBubbles';
 import { filterAndSortBids } from './utils';
-import './styles.scss';
 import { StatusBadge } from '../../components/statusBadge/StatusBadge';
+import './styles.scss';
 
 export const Dashboard = () => {
   const { user, profile } = useAuth();
