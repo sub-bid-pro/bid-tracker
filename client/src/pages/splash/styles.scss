@@ -91,9 +91,7 @@
                 font-weight: 600;
                 border-radius: 8px;
                 background-color: var(--accent);
-
                 color: var(--bg-primary);
-
                 border: 2px solid var(--accent);
                 transition: all 0.2s ease;
                 display: inline-flex;
@@ -154,7 +152,7 @@
 
                 .icon-wrapper {
                     background-color: var(--accent);
-                    color: white;
+                    color: var(--bg-primary);
                     transform: scale(1.05);
                 }
             }
