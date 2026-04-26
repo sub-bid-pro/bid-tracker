@@ -91,7 +91,9 @@
                 font-weight: 600;
                 border-radius: 8px;
                 background-color: var(--accent);
-                color: #ffffff;
+
+                color: var(--bg-primary);
+
                 border: 2px solid var(--accent);
                 transition: all 0.2s ease;
                 display: inline-flex;
@@ -99,7 +101,8 @@
                 justify-content: center;
 
                 &.pulse-hover:hover {
-                    box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.4);
+                    // Fallback box-shadow if --accent-rgb isn't defined
+                    box-shadow: 0 0 20px var(--border-color);
                     transform: translateY(-2px);
                     filter: brightness(1.1);
                 }
