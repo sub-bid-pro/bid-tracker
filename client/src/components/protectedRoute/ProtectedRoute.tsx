@@ -12,9 +12,9 @@ export const ProtectedRoute = ({ requireProfile = true }) => {
     return <PageLoader />;
   }
 
-  // 2. Not logged in at all?
+  // 2. Send guests to the splash screen instead of auth
   if (!session) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/welcome" replace />;
   }
 
   // 3. Needs a profile but hasn't completed onboarding?

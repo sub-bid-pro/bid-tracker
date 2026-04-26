@@ -10,7 +10,13 @@ export const Auth = () => {
   const { session, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isLogin, setIsLogin] = useState(true);
+
+  // --- NEW: Read the URL parameter to determine the initial view ---
+  const [isLogin, setIsLogin] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('tab') !== 'signup';
+  });
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

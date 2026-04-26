@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { Auth } from './pages/auth/Auth';
+import { Splash } from './pages/splash/Splash'; // <-- Import Splash
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { BidTracker } from './pages/bidTracker/BidTracker';
 import { Settings } from './pages/settings/Settings';
@@ -14,17 +15,16 @@ function App() {
       <Navbar />
       <main>
         <Routes>
+          {/* Public Routes */}
+          <Route path="/welcome" element={<Splash />} />
           <Route path="/auth" element={<Auth />} />
-
+          {/* Protected: Requires Login, but NOT a profile yet */}
           <Route element={<ProtectedRoute requireProfile={false} />}>
             <Route path="/onboarding" element={<Onboarding />} />
           </Route>
-
+          {/* Protected: Requires Login AND a completed profile */}
           <Route element={<ProtectedRoute requireProfile={true} />}>
-            {/* Make the new Dashboard the default home page */}
             <Route path="/" element={<Dashboard />} />
-
-            {/* Route the old dashboard to /tracker */}
             <Route path="/tracker" element={<BidTracker />} />
             <Route path="/bids/:id/edit" element={<BidDetailEdit />} />
             <Route path="/settings" element={<Settings />} />
