@@ -1,102 +1,120 @@
 @use "../../styles/variables" as v;
 
-.dashboard-wrapper {
+.home-dashboard-wrapper {
+    padding: v.$gap-xl;
     display: flex;
-    flex-direction: row; // Shift to horizontal layout
-    height: calc(100dvh - v.$nav-height);
-    overflow: hidden;
-    background-color: var(--bg-primary);
+    flex-direction: column;
+    gap: v.$gap-xl;
+    max-width: 1200px;
+    margin: 0 auto;
 
-    .main-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-width: 0; // Prevents flex child from blowing out width
+    .dashboard-header {
+        h1 {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: v.$gap-sm;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
     }
 
-    .bids-container {
-        flex: 1;
-        overflow: auto;
-        background-color: var(--table-bg);
+    .dashboard-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+        gap: v.$gap-lg;
 
-        /* Custom scrollbar */
-        &::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
+        .app-card {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            cursor: pointer;
 
-        &::-webkit-scrollbar-track {
-            background: var(--bg-primary);
-        }
+            /* Smooth hover effect that lifts the card and highlights the arrow */
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+                border-color: var(--accent);
 
-        &::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
+                .card-header .arrow-icon {
+                    transform: translateX(4px);
+                    color: var(--accent);
+                }
+            }
 
-        .bids-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            white-space: nowrap;
-
-            th,
-            td {
-                padding: v.$gap-sm v.$gap-lg;
+            .card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: v.$gap-xl;
+                padding-bottom: v.$gap-md;
                 border-bottom: 1px solid var(--border-color);
+
+                h2 {
+                    font-size: 1.5rem;
+                    color: var(--text-primary);
+                    margin: 0;
+                }
+
+                .arrow-icon {
+                    width: 24px;
+                    height: 24px;
+                    color: var(--text-secondary);
+                    transition: transform 0.2s ease, color 0.2s ease;
+                }
             }
 
-            th {
-                text-transform: uppercase;
-                font-size: 0.8rem;
-                font-weight: 600;
-                color: var(--text-secondary);
-                background-color: var(--bg-secondary);
-                letter-spacing: 0.5px;
-                position: sticky;
-                top: 0;
-                z-index: 10;
-                box-shadow: 0 1px 0 var(--border-color);
+            .metrics-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: v.$gap-lg;
 
-                &.sortable-header {
-                    cursor: pointer;
-                    user-select: none;
-                    transition: color 0.2s ease, background-color 0.2s ease;
+                .metric-item {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
 
-                    &:hover {
+                    h3 {
+                        font-size: 0.9rem;
+                        text-transform: uppercase;
+                        color: var(--text-secondary);
+                        letter-spacing: 0.5px;
+                        margin-bottom: v.$gap-sm;
+                    }
+
+                    .metric-value {
+                        font-size: 2.5rem;
+                        font-weight: 700;
                         color: var(--text-primary);
-                        background-color: var(--bg-primary);
+                        line-height: 1;
+                        margin-bottom: v.$gap-xs;
+
+                        &.text-accent {
+                            color: var(--accent);
+                        }
+
+                        &.text-success {
+                            color: #10b981;
+                        }
                     }
 
-                    .sort-indicator {
-                        margin-left: v.$gap-xs;
-                        font-size: 0.65rem;
-                        color: var(--accent);
-                        vertical-align: middle;
+                    .metric-label {
+                        font-size: 0.85rem;
+                        color: var(--text-secondary);
                     }
                 }
             }
+        }
+    }
 
-            tr {
-                transition: background-color 0.2s ease;
-
-                &.clickable-row {
-                    cursor: pointer;
-                }
-
-                &:hover {
-                    background-color: var(--bg-secondary);
-                }
-            }
-
-            .fw-bold {
-                font-weight: 600;
-                color: var(--text-primary);
-            }
-
-            .text-right {
-                text-align: right;
-            }
+    // Ensure it stacks nicely on mobile
+    @media (max-width: 768px) {
+        .dashboard-content {
+            grid-template-columns: 1fr;
         }
     }
 }

@@ -37,7 +37,7 @@ const Navbar = () => {
         </div>
 
         <Link to="/" className="nav-brand" onClick={closeMenu}>
-          BID_TRACKER
+          Sub Bid Pro
         </Link>
       </nav>
 

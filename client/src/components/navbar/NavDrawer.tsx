@@ -5,13 +5,25 @@ interface NavDrawerProps {
   onClose: () => void;
 }
 
+// 1. Define the shape of our navigation data
+interface NavItem {
+  path: string;
+  label: string;
+  exact?: boolean; // Used to apply the 'end' prop for exact route matching
+}
+
+// 2. Create the data-driven configuration array
+const NAV_ITEMS: NavItem[] = [
+  { path: '/', label: 'Dashboard', exact: true },
+  { path: '/tracker', label: 'Bid Tracker' },
+  { path: '/settings', label: 'Settings' },
+];
+
 export const NavDrawer = ({ isOpen, onClose }: NavDrawerProps) => {
   return (
     <>
-      {/* Clicking this background overlay closes the menu */}
       <div className={`nav-overlay ${isOpen ? 'open' : ''}`} onClick={onClose} />
 
-      {/* The actual sliding menu */}
       <div className={`nav-drawer ${isOpen ? 'open' : ''}`}>
         <div className="drawer-header">
           <span className="drawer-title">Menu</span>
@@ -31,13 +43,12 @@ export const NavDrawer = ({ isOpen, onClose }: NavDrawerProps) => {
         </div>
 
         <div className="nav-links">
-          {/* Clicking a link auto-closes the menu */}
-          <NavLink to="/" end onClick={onClose}>
-            Dashboard
-          </NavLink>
-          <NavLink to="/settings" onClick={onClose}>
-            Settings
-          </NavLink>
+          {/* 3. Iterate over the array to render links dynamically */}
+          {NAV_ITEMS.map((item) => (
+            <NavLink key={item.path} to={item.path} end={item.exact} onClick={onClose}>
+              {item.label}
+            </NavLink>
+          ))}
         </div>
       </div>
     </>

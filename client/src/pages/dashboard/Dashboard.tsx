@@ -1,272 +1,118 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { BidDetailModal } from './components/bidDetailModal/BidDetailModal';
-import { Sidebar } from './components/sidebar/Sidebar';
-import { FilterBubbles } from './components/filterBubbles/FilterBubbles';
-import { filterAndSortBids } from './utils';
-import { StatusBadge } from '../../components/statusBadge/StatusBadge';
 import './styles.scss';
 
 export const Dashboard = () => {
   const { user, profile } = useAuth();
-  const [isSyncing, setIsSyncing] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [bids, setBids] = useState<any[]>([]);
-
-  // Filtering, Sorting, & View State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-
-  // --- NEW: Set default sort to the new column, descending (newest first) ---
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>({
-    key: 'email_received_at',
-    direction: 'desc',
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({
+    active: 0,
+    needsReview: 0,
+    winRate: 0,
   });
-  const [isFullView, setIsFullView] = useState(false);
-
-  // Modal State
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedBid, setSelectedBid] = useState<any>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const fetchBids = async () => {
-    if (!user) return [];
-
-    const { data, error } = await supabase
-      .from('bids')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('email_received_at', { ascending: false }); // <-- NEW: Sort the initial DB fetch as well
-
-    if (error) {
-      console.error('Error fetching bids:', error);
-      return [];
-    } else if (data) {
-      setBids(data);
-      return data;
-    }
-
-    return [];
-  };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchBids();
+    const fetchDashboardStats = async () => {
+      if (!user) return;
+
+      try {
+        // Optimization: We only need the 'status' column to calculate all these metrics
+        const { data, error } = await supabase.from('bids').select('status').eq('user_id', user.id);
+
+        if (error) throw error;
+
+        if (data) {
+          let activeCount = 0;
+          let reviewCount = 0;
+          let wonCount = 0;
+          let lostCount = 0;
+
+          data.forEach((bid) => {
+            // "Needs Review" goes into both its own bucket and the "Active" bucket
+            if (bid.status === 'Needs Review') reviewCount++;
+
+            // Define what makes a bid "Active" (i.e., not decided yet)
+            if (['Needs Review', 'Pending', 'Submitted'].includes(bid.status)) {
+              activeCount++;
+            }
+
+            if (bid.status === 'Won') wonCount++;
+            if (bid.status === 'Lost') lostCount++;
+          });
+
+          // Calculate win rate (only factor in bids that have been decided)
+          const totalDecided = wonCount + lostCount;
+          const calculatedWinRate =
+            totalDecided > 0 ? Math.round((wonCount / totalDecided) * 100) : 0;
+
+          setStats({
+            active: activeCount,
+            needsReview: reviewCount,
+            winRate: calculatedWinRate,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardStats();
   }, [user]);
 
-  const handleSync = async (): Promise<number> => {
-    if (!user) return 0;
-    setIsSyncing(true);
-
-    try {
-      const existingBidIds = new Set(bids.map((bid) => bid.id));
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-
-      const response = await fetch(`${API_URL}/api/bids/sync`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Sync failed on the server.');
-      }
-
-      const updatedBids = await fetchBids();
-      const newBidsAdded = updatedBids.filter((bid) => !existingBidIds.has(bid.id)).length;
-
-      return newBidsAdded;
-    } catch (error) {
-      console.error('Error syncing:', error);
-      throw error;
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  const toggleStatus = (status: string) => {
-    setSelectedStatuses((prev) =>
-      prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status],
-    );
-  };
-
-  const handleSort = (key: string) => {
-    if (!sortConfig || sortConfig.key !== key) {
-      setSortConfig({ key, direction: 'asc' });
-    } else if (sortConfig.direction === 'asc') {
-      setSortConfig({ key, direction: 'desc' });
-    } else {
-      setSortConfig(null);
-    }
-  };
-
-  const processedBids = useMemo(() => {
-    return filterAndSortBids(bids, searchTerm, selectedStatuses, sortConfig);
-  }, [bids, searchTerm, selectedStatuses, sortConfig]);
-
-  const renderSortIndicator = (key: string) => {
-    if (sortConfig?.key !== key) return null;
-    return <span className="sort-indicator">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
-  };
-
-  const needsReviewCount = bids.filter((b) => b.status === 'Needs Review').length;
-
   return (
-    <div className="dashboard-wrapper">
-      <Sidebar
-        isSyncing={isSyncing}
-        handleSync={handleSync}
-        gmailConnected={!!profile?.gmail_connected}
-        bidsCount={bids.length}
-        needsReviewCount={needsReviewCount}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        selectedStatuses={selectedStatuses}
-        toggleStatus={toggleStatus}
-        isFullView={isFullView}
-        setIsFullView={setIsFullView}
-      />
+    <div className="home-dashboard-wrapper">
+      <header className="dashboard-header geometric-container">
+        <h1>Welcome back, {profile?.first_name || 'Builder'}!</h1>
+        <p>Overview for {profile?.company || 'your company'}</p>
+      </header>
 
-      <main className="main-content">
-        <FilterBubbles
-          searchTerm={searchTerm}
-          clearSearch={() => setSearchTerm('')}
-          selectedStatuses={selectedStatuses}
-          removeStatus={toggleStatus}
-          clearAll={() => {
-            setSearchTerm('');
-            setSelectedStatuses([]);
-          }}
-        />
+      <div className="dashboard-content">
+        <Link to="/tracker" className="app-card geometric-container">
+          <div className="card-header">
+            <h2>Bid Tracker</h2>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="arrow-icon"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </div>
 
-        <div className="bids-container">
-          {bids.length > 0 ? (
-            <table className="bids-table">
-              <thead>
-                <tr>
-                  <th onClick={() => handleSort('status')} className="sortable-header">
-                    Status {renderSortIndicator('status')}
-                  </th>
-                  {/* NEW COLUMN HEADER */}
-                  <th onClick={() => handleSort('email_received_at')} className="sortable-header">
-                    Received {renderSortIndicator('email_received_at')}
-                  </th>
-                  <th onClick={() => handleSort('job_name')} className="sortable-header">
-                    Job Name {renderSortIndicator('job_name')}
-                  </th>
-                  <th onClick={() => handleSort('general_contractor')} className="sortable-header">
-                    General Contractor {renderSortIndicator('general_contractor')}
-                  </th>
-
-                  {isFullView && (
-                    <>
-                      <th onClick={() => handleSort('gc_contact')} className="sortable-header">
-                        GC Contact {renderSortIndicator('gc_contact')}
-                      </th>
-                      <th onClick={() => handleSort('location')} className="sortable-header">
-                        Location {renderSortIndicator('location')}
-                      </th>
-                      <th onClick={() => handleSort('sqft')} className="sortable-header">
-                        SqFt {renderSortIndicator('sqft')}
-                      </th>
-                      <th onClick={() => handleSort('labor_type')} className="sortable-header">
-                        Labor {renderSortIndicator('labor_type')}
-                      </th>
-                      <th onClick={() => handleSort('rfi_due_date')} className="sortable-header">
-                        RFI Due {renderSortIndicator('rfi_due_date')}
-                      </th>
-                      <th onClick={() => handleSort('award_date')} className="sortable-header">
-                        Award Date {renderSortIndicator('award_date')}
-                      </th>
-                    </>
-                  )}
-
-                  <th onClick={() => handleSort('bid_due_date')} className="sortable-header">
-                    Bid Due Date {renderSortIndicator('bid_due_date')}
-                  </th>
-
-                  {isFullView && (
-                    <th onClick={() => handleSort('bid_result')} className="sortable-header">
-                      Bid Result {renderSortIndicator('bid_result')}
-                    </th>
-                  )}
-
-                  <th
-                    onClick={() => handleSort('final_bid_amount')}
-                    className="sortable-header text-right"
-                  >
-                    Amount {renderSortIndicator('final_bid_amount')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {processedBids.length > 0 ? (
-                  processedBids.map((bid) => (
-                    <tr
-                      key={bid.id}
-                      onClick={() => {
-                        setSelectedBid(bid);
-                        setIsModalOpen(true);
-                      }}
-                      className="clickable-row"
-                    >
-                      <td>
-                        <StatusBadge status={bid.status} />
-                      </td>
-                      {/* NEW COLUMN DATA */}
-                      <td style={{ whiteSpace: 'nowrap' }}>
-                        {bid.email_received_at
-                          ? new Date(bid.email_received_at).toLocaleDateString()
-                          : '--'}
-                      </td>
-                      <td className="fw-bold">{bid.job_name}</td>
-                      <td>{bid.general_contractor}</td>
-
-                      {isFullView && (
-                        <>
-                          <td>{bid.gc_contact || '--'}</td>
-                          <td>{bid.location || '--'}</td>
-                          <td>{bid.sqft || '--'}</td>
-                          <td>{bid.labor_type || '--'}</td>
-                          <td>{bid.rfi_due_date || '--'}</td>
-                          <td>{bid.award_date || '--'}</td>
-                        </>
-                      )}
-
-                      <td>{bid.bid_due_date || 'TBD'}</td>
-
-                      {isFullView && <td>{bid.bid_result || '--'}</td>}
-
-                      <td className="text-right">
-                        {bid.final_bid_amount ? `$${bid.final_bid_amount.toLocaleString()}` : '--'}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={isFullView ? 13 : 6}
-                      className="empty-state text-center"
-                      style={{ padding: '32px' }}
-                    >
-                      No bids match your active filters.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          ) : (
-            <div className="empty-state" style={{ margin: '24px' }}>
-              <p>No bids loaded yet. Press pull to fetch from Gmail.</p>
+          <div className="metrics-grid">
+            <div className="metric-item">
+              <h3>Active Bids</h3>
+              <p className="metric-value">{isLoading ? '--' : stats.active}</p>
+              <span className="metric-label">Currently in pipeline</span>
             </div>
-          )}
-        </div>
-      </main>
 
-      {isModalOpen && selectedBid && (
-        <BidDetailModal bid={selectedBid} handleModal={() => setIsModalOpen(false)} />
-      )}
+            <div className="metric-item">
+              <h3>Needs Review</h3>
+              <p className={`metric-value ${stats.needsReview > 0 ? 'text-accent' : ''}`}>
+                {isLoading ? '--' : stats.needsReview}
+              </p>
+              <span className="metric-label">Awaiting your action</span>
+            </div>
+
+            <div className="metric-item">
+              <h3>Win Rate</h3>
+              <p className={`metric-value ${stats.winRate > 0 ? 'text-success' : ''}`}>
+                {isLoading ? '--' : `${stats.winRate}%`}
+              </p>
+              <span className="metric-label">Last 30 days</span>
+            </div>
+          </div>
+        </Link>
+      </div>
     </div>
   );
 };
