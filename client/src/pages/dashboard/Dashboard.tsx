@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { AppCard, type MetricItem } from './components/appCard/AppCard';
 import './styles.scss';
 
 export const Dashboard = () => {
@@ -11,6 +11,8 @@ export const Dashboard = () => {
     active: 0,
     needsReview: 0,
     winRate: 0,
+    awards: 0,
+    ytdVolume: 0,
   });
 
   useEffect(() => {
@@ -18,8 +20,10 @@ export const Dashboard = () => {
       if (!user) return;
 
       try {
-        // Optimization: We only need the 'status' column to calculate all these metrics
-        const { data, error } = await supabase.from('bids').select('status').eq('user_id', user.id);
+        const { data, error } = await supabase
+          .from('bids')
+          .select('status, final_bid_amount')
+          .eq('user_id', user.id);
 
         if (error) throw error;
 
@@ -28,21 +32,20 @@ export const Dashboard = () => {
           let reviewCount = 0;
           let wonCount = 0;
           let lostCount = 0;
+          let currentVolume = 0;
 
           data.forEach((bid) => {
-            // "Needs Review" goes into both its own bucket and the "Active" bucket
             if (bid.status === 'Needs Review') reviewCount++;
-
-            // Define what makes a bid "Active" (i.e., not decided yet)
             if (['Needs Review', 'Pending', 'Submitted'].includes(bid.status)) {
               activeCount++;
             }
-
-            if (bid.status === 'Won') wonCount++;
+            if (bid.status === 'Won') {
+              wonCount++;
+              currentVolume += Number(bid.final_bid_amount) || 0;
+            }
             if (bid.status === 'Lost') lostCount++;
           });
 
-          // Calculate win rate (only factor in bids that have been decided)
           const totalDecided = wonCount + lostCount;
           const calculatedWinRate =
             totalDecided > 0 ? Math.round((wonCount / totalDecided) * 100) : 0;
@@ -51,6 +54,8 @@ export const Dashboard = () => {
             active: activeCount,
             needsReview: reviewCount,
             winRate: calculatedWinRate,
+            awards: wonCount,
+            ytdVolume: currentVolume,
           });
         }
       } catch (error) {
@@ -63,6 +68,35 @@ export const Dashboard = () => {
     fetchDashboardStats();
   }, [user]);
 
+  // Define the metrics for the Bid Tracker Card
+  const trackerMetrics: MetricItem[] = [
+    { label: 'Active Bids', value: stats.active, sublabel: 'Currently in pipeline' },
+    {
+      label: 'Needs Review',
+      value: stats.needsReview,
+      sublabel: 'Awaiting your action',
+      valueClass: stats.needsReview > 0 ? 'text-accent' : '',
+    },
+    {
+      label: 'Win Rate',
+      value: `${stats.winRate}%`,
+      sublabel: 'Last 30 days',
+      valueClass: stats.winRate > 0 ? 'text-success' : '',
+    },
+  ];
+
+  // Define the metrics for the new Annual Breakdown Card
+  const annualMetrics: MetricItem[] = [
+    { label: 'YTD Awards', value: stats.awards, sublabel: 'Total jobs won' },
+    {
+      label: 'YTD Volume',
+      value: `$${stats.ytdVolume.toLocaleString()}`,
+      sublabel: 'Total awarded value',
+      valueClass: stats.ytdVolume > 0 ? 'text-success' : '',
+    },
+    { label: 'YTD Win Rate', value: `${stats.winRate}%`, sublabel: 'Overall success' },
+  ];
+
   return (
     <div className="home-dashboard-wrapper">
       <header className="dashboard-header geometric-container">
@@ -71,47 +105,13 @@ export const Dashboard = () => {
       </header>
 
       <div className="dashboard-content">
-        <Link to="/tracker" className="app-card geometric-container">
-          <div className="card-header">
-            <h2>Bid Tracker</h2>
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="arrow-icon"
-            >
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </div>
-
-          <div className="metrics-grid">
-            <div className="metric-item">
-              <h3>Active Bids</h3>
-              <p className="metric-value">{isLoading ? '--' : stats.active}</p>
-              <span className="metric-label">Currently in pipeline</span>
-            </div>
-
-            <div className="metric-item">
-              <h3>Needs Review</h3>
-              <p className={`metric-value ${stats.needsReview > 0 ? 'text-accent' : ''}`}>
-                {isLoading ? '--' : stats.needsReview}
-              </p>
-              <span className="metric-label">Awaiting your action</span>
-            </div>
-
-            <div className="metric-item">
-              <h3>Win Rate</h3>
-              <p className={`metric-value ${stats.winRate > 0 ? 'text-success' : ''}`}>
-                {isLoading ? '--' : `${stats.winRate}%`}
-              </p>
-              <span className="metric-label">Last 30 days</span>
-            </div>
-          </div>
-        </Link>
+        <AppCard to="/tracker" title="Bid Tracker" metrics={trackerMetrics} isLoading={isLoading} />
+        <AppCard
+          to="/annual-breakdown"
+          title="YTD Annual Breakdown"
+          metrics={annualMetrics}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

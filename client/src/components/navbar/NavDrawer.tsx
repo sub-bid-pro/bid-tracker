@@ -16,6 +16,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { path: '/', label: 'Dashboard', exact: true },
   { path: '/tracker', label: 'Bid Tracker' },
+  { path: '/annual-breakdown', label: 'Annual Breakdown' },
   { path: '/settings', label: 'Settings' },
 ];
 
