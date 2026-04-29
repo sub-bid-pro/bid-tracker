@@ -7,6 +7,7 @@ import { FilterBubbles } from './components/filterBubbles/FilterBubbles';
 import { BidsTable } from './components/bidsTable/BidsTable'; // <-- Import the new component
 import { filterAndSortBids } from './utils';
 import './styles.scss';
+import { useToast } from '../../contexts/ToastContext';
 
 export const BidTracker = () => {
   const { user, profile } = useAuth();
@@ -28,6 +29,8 @@ export const BidTracker = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedBid, setSelectedBid] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { showToast } = useToast();
 
   const fetchBids = async () => {
     if (!user) return [];
@@ -106,6 +109,32 @@ export const BidTracker = () => {
 
   const needsReviewCount = bids.filter((b) => b.status === 'Needs Review').length;
 
+  const copyTableToClipboard = () => {
+    const headers = [
+      'Status',
+      'Date Received',
+      'Job Name',
+      'General Contractor',
+      'Amount',
+      'Due Date',
+    ];
+
+    const rows = processedBids.map((bid) => [
+      bid.status,
+      new Date(bid.email_received_at).toLocaleDateString(),
+      bid.job_name,
+      bid.general_contractor,
+      bid.final_bid_amount ? `$${bid.final_bid_amount.toLocaleString()}` : 'TBD',
+      bid.bid_due_date || '--',
+    ]);
+
+    // Join with Tabs (\t) for columns and Newlines (\n) for rows
+    const tsvContent = [headers.join('\t'), ...rows.map((row) => row.join('\t'))].join('\n');
+
+    navigator.clipboard.writeText(tsvContent);
+    showToast('Table copied to clipboard!', 'success');
+  };
+
   return (
     <div className="dashboard-wrapper">
       <Sidebar
@@ -120,6 +149,7 @@ export const BidTracker = () => {
         toggleStatus={toggleStatus}
         isFullView={isFullView}
         setIsFullView={setIsFullView}
+        onCopyTable={copyTableToClipboard}
       />
 
       <main className="main-content">

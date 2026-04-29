@@ -2,6 +2,7 @@ import { SidebarActions } from './components/SidebarActions';
 import { SidebarStats } from './components/SidebarStats';
 import { SidebarSearch } from './components/SidebarSearch';
 import { SidebarFilters } from './components/SidebarFilters';
+import { SidebarCopyAction } from './components/SidebarCopyAction';
 import './styles.scss';
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
   toggleStatus: (status: string) => void;
   isFullView: boolean;
   setIsFullView: (val: boolean) => void;
+  onCopyTable: () => void;
 }
 
 export const Sidebar = ({
@@ -30,6 +32,7 @@ export const Sidebar = ({
   toggleStatus,
   isFullView,
   setIsFullView,
+  onCopyTable,
 }: Props) => {
   return (
     <aside className="dashboard-sidebar">
@@ -46,6 +49,8 @@ export const Sidebar = ({
       <SidebarSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
       <SidebarFilters selectedStatuses={selectedStatuses} toggleStatus={toggleStatus} />
+
+      <SidebarCopyAction onCopyTable={onCopyTable} />
     </aside>
   );
 };

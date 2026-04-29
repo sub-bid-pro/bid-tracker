@@ -258,4 +258,42 @@
             }
         }
     }
+
+    .sidebar-footer {
+        margin-top: auto;
+        padding: v.$gap-lg;
+        border-top: 1px solid var(--border-color);
+
+        .copy-table-btn {
+            width: 100%;
+            background: none;
+            border: 1px dashed var(--border-color);
+            color: var(--text-secondary);
+            padding: 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            .copy-icon {
+                opacity: 0.8;
+                transition: opacity 0.2s ease;
+            }
+
+            &:hover {
+                color: var(--text-primary);
+                border-color: var(--text-secondary);
+                background-color: var(--bg-primary);
+
+                .copy-icon {
+                    opacity: 1;
+                }
+            }
+        }
+    }
 }
