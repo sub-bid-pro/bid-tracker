@@ -78,6 +78,9 @@ export const BidsTable = ({ bids, isFullView, sortConfig, onSort, onRowClick }: 
               <th onClick={() => onSort('final_bid_amount')} className="sortable-header text-right">
                 Amount {renderSortIndicator('final_bid_amount')}
               </th>
+
+              {/* NEW: Action Column Header */}
+              <th>Link</th>
             </tr>
           </thead>
           <tbody>
@@ -118,6 +121,27 @@ export const BidsTable = ({ bids, isFullView, sortConfig, onSort, onRowClick }: 
 
                 <td className="text-right">
                   {bid.final_bid_amount ? `$${bid.final_bid_amount.toLocaleString()}` : '--'}
+                </td>
+
+                {/* NEW: Gmail Link Cell */}
+                <td>
+                  {bid.thread_id ? (
+                    <a
+                      href={`https://mail.google.com/mail/u/0/#all/${bid.thread_id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()} // Crucial: Prevents the row click from firing
+                      style={{
+                        color: 'var(--accent)',
+                        textDecoration: 'underline',
+                        fontSize: '0.85rem',
+                      }}
+                    >
+                      View Email
+                    </a>
+                  ) : (
+                    '--'
+                  )}
                 </td>
               </tr>
             ))}

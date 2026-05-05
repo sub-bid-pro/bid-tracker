@@ -12,6 +12,8 @@ interface Profile {
   business_phone?: string;
   onboarding_complete: boolean;
   gmail_connected: boolean;
+  drive_root_folder_name?: string;
+  storage_preference?: string;
 }
 
 interface AuthContextType {

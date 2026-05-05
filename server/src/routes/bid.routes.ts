@@ -14,9 +14,9 @@ router.post('/sync', async (req, res) => {
     // Await the sync process
     await syncUserBids(userId);
     res.status(200).json({ message: 'Sync complete' });
-  } catch (error) {
-    console.error('Sync route error:', error);
-    res.status(500).json({ error: 'Failed to sync bids' });
+  } catch (error: any) {
+    console.error('Sync route error:', error.message);
+    res.status(500).json({ error: error.message || 'Failed to sync bids' });
   }
 });
 

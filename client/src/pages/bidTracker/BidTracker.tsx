@@ -109,7 +109,7 @@ export const BidTracker = () => {
 
   const needsReviewCount = bids.filter((b) => b.status === 'Needs Review').length;
 
-  const copyTableToClipboard = () => {
+  const copyAsCSV = () => {
     const headers = [
       'Status',
       'Date Received',
@@ -128,11 +128,22 @@ export const BidTracker = () => {
       bid.bid_due_date || '--',
     ]);
 
-    // Join with Tabs (\t) for columns and Newlines (\n) for rows
-    const tsvContent = [headers.join('\t'), ...rows.map((row) => row.join('\t'))].join('\n');
+    const escapeCSV = (val: string) => {
+      if (val === null || val === undefined) return '';
+      const s = String(val);
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+        return `"${s.replace(/"/g, '""')}"`;
+      }
+      return s;
+    };
 
-    navigator.clipboard.writeText(tsvContent);
-    showToast('Table copied to clipboard!', 'success');
+    const csvContent = [
+      headers.map(escapeCSV).join(','),
+      ...rows.map((row) => row.map(escapeCSV).join(',')),
+    ].join('\n');
+
+    navigator.clipboard.writeText(csvContent);
+    showToast('Data copied to clipboard as CSV!', 'success');
   };
 
   return (
@@ -149,7 +160,7 @@ export const BidTracker = () => {
         toggleStatus={toggleStatus}
         isFullView={isFullView}
         setIsFullView={setIsFullView}
-        onCopyTable={copyTableToClipboard}
+        onCopyCSV={copyAsCSV}
       />
 
       <main className="main-content">

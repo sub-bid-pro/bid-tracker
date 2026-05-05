@@ -2,15 +2,11 @@ import { supabaseAdmin } from '../lib/supabase';
 import { google } from 'googleapis';
 import { decodeBase64 } from '../utils/string.utils';
 import { parseBidEmail, extractBidAmountFromPDF } from '../utils/parser.utils';
+import { findOrCreateFolder, uploadAttachmentToDrive } from './drive.service';
+import { oauth2Client } from '../lib/google';
 
 // @ts-ignore - Tell TypeScript to ignore the lack of type definitions
 import pdfParse from 'pdf-parse';
-
-export const oauth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI,
-);
 
 export const syncUserBids = async (userId: string) => {
   console.log(`\n===========================================`);
@@ -70,14 +66,16 @@ export const syncUserBids = async (userId: string) => {
       const payload = detail.data.payload;
       let encodedBody = '';
       let attachmentId = null;
+      let attachmentFileName = 'Attachment.pdf'; // NEW: Store the filename
 
-      // --- NEW: RECURSIVE SEARCH FOR BODY & ATTACHMENT ---
+      // --- RECURSIVE SEARCH FOR BODY & ATTACHMENT ---
       const extractParts = (parts: any[]) => {
         for (const part of parts) {
           if (part.mimeType === 'text/plain' && part.body?.data) {
             encodedBody = part.body.data;
           } else if (part.filename?.toLowerCase().endsWith('.pdf') && part.body?.attachmentId) {
             attachmentId = part.body.attachmentId;
+            attachmentFileName = part.filename; // NEW: Capture the real file name
             console.log(`[Attachment] Found PDF: ${part.filename}`);
           }
 
@@ -94,7 +92,7 @@ export const syncUserBids = async (userId: string) => {
         encodedBody = payload.body.data;
       }
 
-      // --- NEW: DON'T SKIP IF WE HAVE AN ATTACHMENT ---
+      // --- DON'T SKIP IF WE HAVE AN ATTACHMENT ---
       if (!encodedBody && !attachmentId) {
         console.log(`[Skip] Could not extract text body OR attachment for message ${msg.id}`);
         continue;
@@ -158,7 +156,7 @@ export const syncUserBids = async (userId: string) => {
             const pdfData = await pdfParse.default(pdfBuffer);
             pdfDataText = pdfData.text;
           } else if (pdfParse && pdfParse.PDFParse) {
-            // NEW: Handle v2 Class-based API
+            // Handle v2 Class-based API
             const parser = new pdfParse.PDFParse({ data: pdfBuffer });
             try {
               const parsed = await parser.getText();
@@ -176,6 +174,34 @@ export const syncUserBids = async (userId: string) => {
 
           // Pass the extracted string to your amount extractor
           const finalAmount = extractBidAmountFromPDF(pdfDataText);
+
+          // ==========================================
+          // NEW: GOOGLE DRIVE UPLOAD LOGIC
+          // ==========================================
+          console.log(`[Drive API] Organizing and uploading attachment...`);
+          const rootFolderName = 'Bid Tracker App';
+          const currentYear = new Date().getFullYear().toString();
+          const statusFolderName = 'Submitted';
+          const safeJobName = (parsedData.project_name || 'Unknown Project').replace(
+            /[/\\?%*:|"<>]/g,
+            '-',
+          );
+
+          // Build the folder structure
+          const rootId = await findOrCreateFolder(rootFolderName);
+          const yearId = await findOrCreateFolder(currentYear, rootId);
+          const statusId = await findOrCreateFolder(statusFolderName, yearId);
+          const projectFolderId = await findOrCreateFolder(safeJobName, statusId);
+
+          // Upload the PDF into the project folder
+          const driveFile = await uploadAttachmentToDrive(
+            attachmentFileName,
+            'application/pdf',
+            pdfBuffer,
+            projectFolderId,
+          );
+          console.log(`[Drive API] Uploaded successfully: ${driveFile.webViewLink}`);
+          // ==========================================
 
           let targetBidId = existingThreadBid?.id;
 
@@ -196,7 +222,6 @@ export const syncUserBids = async (userId: string) => {
             else console.log(`[DB WARNING] Fuzzy match failed. No prior bid found.`);
           }
 
-          // --- UPDATED LOGIC HERE ---
           if (targetBidId && finalAmount !== null) {
             console.log(`[DB] Updating Bid ${targetBidId} to Submitted at $${finalAmount}`);
             await supabaseAdmin
@@ -205,10 +230,11 @@ export const syncUserBids = async (userId: string) => {
                 status: 'Submitted',
                 final_bid_amount: finalAmount,
                 thread_id: threadId,
+                drive_folder_id: projectFolderId, // NEW: Save the folder ID
+                attachment_url: driveFile.webViewLink, // NEW: Save the file link
               })
               .eq('id', targetBidId);
           } else if (!targetBidId && finalAmount !== null) {
-            // NEW: If no prior bid exists, create a brand new one as "Submitted"!
             console.log(`[DB] Creating NEW "Submitted" Bid for standalone submission...`);
             const receivedAt = detail.data.internalDate
               ? new Date(Number(detail.data.internalDate)).toISOString()
@@ -224,6 +250,8 @@ export const syncUserBids = async (userId: string) => {
               status: 'Submitted',
               final_bid_amount: finalAmount,
               email_received_at: receivedAt,
+              drive_folder_id: projectFolderId, // NEW: Save the folder ID
+              attachment_url: driveFile.webViewLink, // NEW: Save the file link
             });
           }
         }
@@ -237,7 +265,17 @@ export const syncUserBids = async (userId: string) => {
     console.log(`\n===========================================`);
     console.log(`Sync Complete`);
     console.log(`===========================================\n`);
-  } catch (error) {
-    console.error(`\n[FATAL ERROR] Failed to sync bids:`, error);
+  } catch (error: any) {
+    console.error(`\n[FATAL ERROR] Failed to sync bids:`, error.message || error);
+
+    // Auto-disconnect if the token is dead
+    if (error.message === 'invalid_grant' || error?.response?.data?.error === 'invalid_grant') {
+      console.log(`[Auth Cleanup] Invalid grant detected. Disconnecting user ${userId}...`);
+      await supabaseAdmin.from('google_tokens').delete().eq('id', userId);
+      await supabaseAdmin.from('profiles').update({ gmail_connected: false }).eq('id', userId);
+      throw new Error('Gmail connection expired. Please reconnect your account in Settings.');
+    }
+
+    throw new Error('Failed to sync bids with Google.');
   }
 };

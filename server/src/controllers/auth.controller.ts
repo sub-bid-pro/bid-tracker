@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
-import { oauth2Client, syncUserBids } from '../services/gmail.service';
+import { oauth2Client } from '../lib/google';
+import { syncUserBids } from '../services/gmail.service';
 import { supabaseAdmin } from '../lib/supabase';
 
 export const generateAuthUrl = (req: Request, res: Response) => {
@@ -11,7 +12,11 @@ export const generateAuthUrl = (req: Request, res: Response) => {
 
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
-    scope: ['https://www.googleapis.com/auth/gmail.readonly'],
+    // NEW: Added the drive.file scope
+    scope: [
+      'https://www.googleapis.com/auth/gmail.readonly',
+      'https://www.googleapis.com/auth/drive.file',
+    ],
     prompt: 'consent select_account',
     state: userId,
   });

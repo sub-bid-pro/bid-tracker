@@ -17,7 +17,7 @@ interface Props {
   toggleStatus: (status: string) => void;
   isFullView: boolean;
   setIsFullView: (val: boolean) => void;
-  onCopyTable: () => void;
+  onCopyCSV: () => void;
 }
 
 export const Sidebar = ({
@@ -32,7 +32,7 @@ export const Sidebar = ({
   toggleStatus,
   isFullView,
   setIsFullView,
-  onCopyTable,
+  onCopyCSV,
 }: Props) => {
   return (
     <aside className="dashboard-sidebar">
@@ -50,7 +50,7 @@ export const Sidebar = ({
 
       <SidebarFilters selectedStatuses={selectedStatuses} toggleStatus={toggleStatus} />
 
-      <SidebarCopyAction onCopyTable={onCopyTable} />
+      <SidebarCopyAction onCopyCSV={onCopyCSV} />
     </aside>
   );
 };
