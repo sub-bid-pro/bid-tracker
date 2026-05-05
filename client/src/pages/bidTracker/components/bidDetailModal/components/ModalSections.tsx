@@ -26,13 +26,7 @@ export const SummaryBlock = ({ summary }: { summary: string }) => {
   );
 };
 
-export const DynamicSection = ({
-  configKey,
-  bid,
-}: {
-  configKey: keyof typeof BID_SECTIONS_CONFIG;
-  bid: Bid;
-}) => {
+export const DynamicSection = ({ configKey, bid }: { configKey: string; bid: Bid }) => {
   const section = BID_SECTIONS_CONFIG[configKey];
 
   return (

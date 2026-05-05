@@ -1,7 +1,22 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Bid = any;
 
-export const BID_SECTIONS_CONFIG = {
+// 1. EXPLICITLY DEFINE THE FIELD SHAPE
+export interface FieldConfig {
+  label: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getValue: (bid: Bid) => any;
+  fullWidth?: boolean; // The "?" tells TypeScript this is optional!
+}
+
+// 2. EXPLICITLY DEFINE THE SECTION SHAPE
+export interface SectionConfig {
+  title: string;
+  fields: FieldConfig[];
+}
+
+// 3. APPLY THE TYPE TO THE CONFIGURATION
+export const BID_SECTIONS_CONFIG: Record<string, SectionConfig> = {
   core: {
     title: 'Core Details',
     fields: [
