@@ -223,5 +223,18 @@
                 color: var(--accent);
             }
         }
+
+        .copy-csv-btn {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+
+            &:hover {
+                background-color: var(--bg-secondary);
+                border-color: var(--text-secondary);
+            }
+        }
     }
 }

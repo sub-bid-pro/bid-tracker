@@ -3,13 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { onClose, useEscapeKey } from '../../../../components/modals/utils';
 import { ModalFooter } from './components/ModalFooter';
 import { ModalHeader } from './components/ModalHeader';
-import {
-  SummaryBlock,
-  CoreDetails,
-  StatusFinancials,
-  DatesDeadlines,
-  AdditionalMetadata,
-} from './components/ModalSections';
+import { SummaryBlock, DynamicSection } from './components/ModalSections';
 import './styles.scss';
 
 interface Props {
@@ -41,13 +35,13 @@ export const BidDetailModal = ({ bid, handleModal }: Props) => {
           {/* TWO COLUMN DESKTOP LAYOUT */}
           <div className="modal-columns">
             <div className="column">
-              <CoreDetails bid={bid} />
-              <AdditionalMetadata bid={bid} />
+              <DynamicSection configKey="core" bid={bid} />
+              <DynamicSection configKey="metadata" bid={bid} />
             </div>
 
             <div className="column">
-              <StatusFinancials bid={bid} />
-              <DatesDeadlines bid={bid} />
+              <DynamicSection configKey="financials" bid={bid} />
+              <DynamicSection configKey="dates" bid={bid} />
             </div>
           </div>
         </div>
