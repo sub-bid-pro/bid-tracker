@@ -1,10 +1,50 @@
 import { StatusBadge } from '../../../../components/statusBadge/StatusBadge';
+import EmailIcon from '@mui/icons-material/Email';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import FolderSharedIcon from '@mui/icons-material/FolderShared';
 
 // Helper function to handle character limits
 const truncateText = (text: string | null | undefined, limit: number) => {
   if (!text) return '--';
   if (text.length <= limit) return text;
   return `${text.substring(0, limit).trim()}...`;
+};
+
+// NEW: Helper component using SCSS classes instead of inline styles
+const IconLink = ({
+  url,
+  Icon,
+  title,
+}: {
+  url: string | null | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Icon: any;
+  title: string;
+}) => {
+  if (!url) {
+    return (
+      <span
+        title={`No ${title} available`}
+        className="icon-link disabled"
+        onClick={(e) => e.stopPropagation()} // Prevent row click when clicking disabled icon
+      >
+        <Icon sx={{ fontSize: 20 }} />
+      </span>
+    );
+  }
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      title={title}
+      className="icon-link active"
+      onClick={(e) => e.stopPropagation()} // Crucial: Prevents the row click from firing
+    >
+      <Icon sx={{ fontSize: 20 }} />
+    </a>
+  );
 };
 
 interface BidsTableProps {
@@ -79,78 +119,83 @@ export const BidsTable = ({ bids, isFullView, sortConfig, onSort, onRowClick }: 
                 Amount {renderSortIndicator('final_bid_amount')}
               </th>
 
-              {/* NEW: Action Column Header */}
-              <th>Link</th>
+              <th>Links</th>
             </tr>
           </thead>
           <tbody>
-            {bids.map((bid) => (
-              <tr key={bid.id} onClick={() => onRowClick(bid)} className="clickable-row">
-                <td>
-                  <StatusBadge status={bid.status} />
-                </td>
-                <td style={{ whiteSpace: 'nowrap' }}>
-                  {bid.email_received_at
-                    ? new Date(bid.email_received_at).toLocaleDateString()
-                    : '--'}
-                </td>
+            {bids.map((bid) => {
+              // Calculate links dynamically for the current row
+              const gmailLink = bid.thread_id
+                ? `https://mail.google.com/mail/u/0/#all/${bid.thread_id}`
+                : null;
+              const driveLink =
+                bid.drive_folder_link ||
+                (bid.drive_folder_id
+                  ? `https://drive.google.com/drive/folders/${bid.drive_folder_id}`
+                  : null);
 
-                <td className="fw-bold" title={bid.job_name}>
-                  {isFullView ? bid.job_name || '--' : truncateText(bid.job_name, 35)}
-                </td>
-                <td title={bid.general_contractor}>
-                  {isFullView
-                    ? bid.general_contractor || '--'
-                    : truncateText(bid.general_contractor, 30)}
-                </td>
+              return (
+                <tr key={bid.id} onClick={() => onRowClick(bid)} className="clickable-row">
+                  <td>
+                    <StatusBadge status={bid.status} />
+                  </td>
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    {bid.email_received_at
+                      ? new Date(bid.email_received_at).toLocaleDateString()
+                      : '--'}
+                  </td>
 
-                {isFullView && (
-                  <>
-                    <td>{bid.gc_contact || '--'}</td>
-                    <td>{bid.location || '--'}</td>
-                    <td>{bid.sqft || '--'}</td>
-                    <td>{bid.labor_type || '--'}</td>
-                    <td>{bid.rfi_due_date || '--'}</td>
-                    <td>{bid.award_date || '--'}</td>
-                  </>
-                )}
+                  <td className="fw-bold" title={bid.job_name}>
+                    {isFullView ? bid.job_name || '--' : truncateText(bid.job_name, 35)}
+                  </td>
+                  <td title={bid.general_contractor}>
+                    {isFullView
+                      ? bid.general_contractor || '--'
+                      : truncateText(bid.general_contractor, 30)}
+                  </td>
 
-                <td>{bid.bid_due_date || 'TBD'}</td>
-
-                {isFullView && <td>{bid.bid_result || '--'}</td>}
-
-                <td className="text-right">
-                  {bid.final_bid_amount ? `$${bid.final_bid_amount.toLocaleString()}` : '--'}
-                </td>
-
-                {/* NEW: Gmail Link Cell */}
-                <td>
-                  {bid.thread_id ? (
-                    <a
-                      href={`https://mail.google.com/mail/u/0/#all/${bid.thread_id}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      onClick={(e) => e.stopPropagation()} // Crucial: Prevents the row click from firing
-                      style={{
-                        color: 'var(--accent)',
-                        textDecoration: 'underline',
-                        fontSize: '0.85rem',
-                      }}
-                    >
-                      View Email
-                    </a>
-                  ) : (
-                    '--'
+                  {isFullView && (
+                    <>
+                      <td>{bid.gc_contact || '--'}</td>
+                      <td>{bid.location || '--'}</td>
+                      <td>{bid.sqft || '--'}</td>
+                      <td>{bid.labor_type || '--'}</td>
+                      <td>{bid.rfi_due_date || '--'}</td>
+                      <td>{bid.award_date || '--'}</td>
+                    </>
                   )}
-                </td>
-              </tr>
-            ))}
+
+                  <td>{bid.bid_due_date || 'TBD'}</td>
+
+                  {isFullView && <td>{bid.bid_result || '--'}</td>}
+
+                  <td className="text-right">
+                    {bid.final_bid_amount ? `$${bid.final_bid_amount.toLocaleString()}` : '--'}
+                  </td>
+
+                  {/* Cleaned up container class */}
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <div className="icon-links-container">
+                      <IconLink url={gmailLink} Icon={EmailIcon} title="Gmail Thread" />
+                      <IconLink
+                        url={bid.attachment_url}
+                        Icon={AttachFileIcon}
+                        title="Primary PDF"
+                      />
+                      <IconLink
+                        url={driveLink}
+                        Icon={FolderSharedIcon}
+                        title="Google Drive Folder"
+                      />
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       ) : (
-        <div className="empty-state text-center" style={{ margin: '32px' }}>
-          No bids match your active filters or no bids loaded yet.
-        </div>
+        <div className="empty-state">No bids match your active filters or no bids loaded yet.</div>
       )}
     </div>
   );
