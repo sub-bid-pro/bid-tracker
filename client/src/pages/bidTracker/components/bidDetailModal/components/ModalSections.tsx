@@ -80,16 +80,23 @@ export const DatesDeadlines = ({ bid }: { bid: Bid }) => (
   </section>
 );
 
-export const LinksMetadata = ({ bid }: { bid: Bid }) => (
-  <section className="modal-section">
-    <h3>Links & Metadata</h3>
-    <div className="modal-grid">
-      <DataGroup linkText="Open Portal ↗" label="Portal Link" value={bid.portal_link} />
-      <DataGroup linkText="Open Drive ↗" label="Drive Folder" value={bid.drive_folder_link} />
-      <DataGroup label="Row Helper" value={bid.row_helper} />
-      <DataGroup label="Heal Status" value={bid.heal_status} />
-      <DataGroup fullWidth label="Addendum" value={bid.addendum} />
-      <DataGroup fullWidth label="Search Keywords" value={bid.search_keywords} />
-    </div>
-  </section>
-);
+export const LinksMetadata = ({ bid }: { bid: Bid }) => {
+  const gmailLink = bid.thread_id ? `https://mail.google.com/mail/u/0/#all/${bid.thread_id}` : null;
+  const driveLink = bid.drive_folder_link || (bid.drive_folder_id ? `https://drive.google.com/drive/folders/${bid.drive_folder_id}` : null);
+
+  return (
+    <section className="modal-section">
+      <h3>Links & Metadata</h3>
+      <div className="modal-grid">
+        <DataGroup linkText="View Gmail Thread ↗" label="Email Thread" value={gmailLink} />
+        <DataGroup linkText="View Bid PDF ↗" label="Attachment" value={bid.attachment_url} />
+        <DataGroup linkText="Open Portal ↗" label="Portal Link" value={bid.portal_link} />
+        <DataGroup linkText="Open Drive ↗" label="Drive Folder" value={driveLink} />
+        <DataGroup label="Row Helper" value={bid.row_helper} />
+        <DataGroup label="Heal Status" value={bid.heal_status} />
+        <DataGroup fullWidth label="Addendum" value={bid.addendum} />
+        <DataGroup fullWidth label="Search Keywords" value={bid.search_keywords} />
+      </div>
+    </section>
+  );
+};
