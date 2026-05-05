@@ -8,7 +8,7 @@ import {
   CoreDetails,
   StatusFinancials,
   DatesDeadlines,
-  LinksMetadata,
+  AdditionalMetadata,
 } from './components/ModalSections';
 import './styles.scss';
 
@@ -42,7 +42,7 @@ export const BidDetailModal = ({ bid, handleModal }: Props) => {
           <div className="modal-columns">
             <div className="column">
               <CoreDetails bid={bid} />
-              <LinksMetadata bid={bid} />
+              <AdditionalMetadata bid={bid} />
             </div>
 
             <div className="column">
@@ -52,7 +52,7 @@ export const BidDetailModal = ({ bid, handleModal }: Props) => {
           </div>
         </div>
 
-        <ModalFooter onClose={handleClose} onEdit={handleEdit} />
+        <ModalFooter bid={bid} onClose={handleClose} onEdit={handleEdit} />
       </div>
     </div>
   );

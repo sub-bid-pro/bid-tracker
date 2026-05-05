@@ -5,24 +5,16 @@ type Bid = any;
 const DataGroup = ({
   label,
   value,
-  linkText,
   fullWidth,
 }: {
   label: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any;
-  linkText?: string;
   fullWidth?: boolean;
 }) => (
   <div className={`data-group ${fullWidth ? 'full-width' : ''}`}>
     <label>{label}</label>
-    {linkText && value ? (
-      <a href={value} target="_blank" rel="noreferrer">
-        {linkText}
-      </a>
-    ) : (
-      <p>{value || '--'}</p>
-    )}
+    <p>{value || '--'}</p>
   </div>
 );
 
@@ -80,18 +72,11 @@ export const DatesDeadlines = ({ bid }: { bid: Bid }) => (
   </section>
 );
 
-export const LinksMetadata = ({ bid }: { bid: Bid }) => {
-  const gmailLink = bid.thread_id ? `https://mail.google.com/mail/u/0/#all/${bid.thread_id}` : null;
-  const driveLink = bid.drive_folder_link || (bid.drive_folder_id ? `https://drive.google.com/drive/folders/${bid.drive_folder_id}` : null);
-
+export const AdditionalMetadata = ({ bid }: { bid: Bid }) => {
   return (
     <section className="modal-section">
-      <h3>Links & Metadata</h3>
+      <h3>Additional Metadata</h3>
       <div className="modal-grid">
-        <DataGroup linkText="View Gmail Thread ↗" label="Email Thread" value={gmailLink} />
-        <DataGroup linkText="View Bid PDF ↗" label="Attachment" value={bid.attachment_url} />
-        <DataGroup linkText="Open Portal ↗" label="Portal Link" value={bid.portal_link} />
-        <DataGroup linkText="Open Drive ↗" label="Drive Folder" value={driveLink} />
         <DataGroup label="Row Helper" value={bid.row_helper} />
         <DataGroup label="Heal Status" value={bid.heal_status} />
         <DataGroup fullWidth label="Addendum" value={bid.addendum} />
