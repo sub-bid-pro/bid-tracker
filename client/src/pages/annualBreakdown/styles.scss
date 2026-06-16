@@ -6,50 +6,190 @@
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: v.$gap-xl;
+    gap: v.$gap-lg;
 
-    .page-header {
-        text-align: center;
-
-        h1 {
-            font-size: 1.5rem;
-            color: var(--text-primary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-    }
-
-    .kpi-bar {
+    // ── Header ──────────────────────────────────────────────────────────────
+    .ab-header {
         display: flex;
         justify-content: space-between;
-        flex-wrap: wrap;
-        gap: v.$gap-md;
-        padding: v.$gap-lg;
+        align-items: flex-end;
 
-        .kpi-item {
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        p {
+            margin-top: v.$gap-xs;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .ab-year {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            font-variant-numeric: tabular-nums;
+        }
+    }
+
+    // ── KPI Strip ───────────────────────────────────────────────────────────
+    .ab-kpi-strip {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+
+        .ab-kpi-tile {
+            padding: v.$gap-lg;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            flex: 1;
-            min-width: 120px;
-            text-align: center;
+            gap: v.$gap-xs;
+            border-right: 1px solid var(--border-color);
 
-            .kpi-label {
-                font-size: 0.85rem;
-                font-weight: 600;
-                color: var(--text-secondary);
-                text-transform: uppercase;
-                margin-bottom: v.$gap-sm;
+            &:last-child {
+                border-right: none;
             }
 
-            .kpi-value {
-                font-size: 2rem;
+            .kpi-val {
+                font-size: 1.75rem;
                 font-weight: 700;
+                line-height: 1;
                 color: var(--text-primary);
+            }
+
+            .kpi-label {
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: var(--text-secondary);
             }
         }
     }
 
+    // ── Shared section title ─────────────────────────────────────────────────
+    .ab-section-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+        font-weight: 600;
+        margin-bottom: v.$gap-md;
+    }
+
+    // ── Status Distribution ──────────────────────────────────────────────────
+    .ab-distribution {
+        .dist-bar {
+            display: flex;
+            height: 28px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+
+            .dist-seg {
+                height: 100%;
+                transition: width 0.5s ease;
+
+                &.seg-won       { background-color: #3b82f6; }
+                &.seg-submitted { background-color: #10b981; }
+                &.seg-pending   { background-color: #f59e0b; }
+                &.seg-review    { background-color: #ef4444; }
+                &.seg-lost      { background-color: #71717a; }
+            }
+        }
+
+        .dist-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: v.$gap-lg;
+            margin-top: v.$gap-md;
+
+            .leg-item {
+                display: flex;
+                align-items: center;
+                gap: v.$gap-xs;
+                font-size: 0.8rem;
+                color: var(--text-secondary);
+
+                .leg-dot {
+                    display: inline-block;
+                    width: 10px;
+                    height: 10px;
+                    flex-shrink: 0;
+
+                    &.dot-won       { background-color: #3b82f6; }
+                    &.dot-submitted { background-color: #10b981; }
+                    &.dot-pending   { background-color: #f59e0b; }
+                    &.dot-review    { background-color: #ef4444; }
+                    &.dot-lost      { background-color: #71717a; }
+                }
+            }
+        }
+    }
+
+    // ── Monthly Bar Chart ────────────────────────────────────────────────────
+    .ab-chart {
+        .bar-chart {
+            display: flex;
+            gap: v.$gap-xs;
+            height: 180px;
+
+            .bar-col {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 0;
+
+                .bar-count {
+                    font-size: 0.65rem;
+                    height: 18px;
+                    line-height: 18px;
+                    color: var(--text-secondary);
+                    font-variant-numeric: tabular-nums;
+                }
+
+                .bar-inner {
+                    flex: 1;
+                    width: 100%;
+                    display: flex;
+                    align-items: flex-end;
+                    border-bottom: 1px solid var(--border-color);
+                }
+
+                .bar-fill {
+                    width: 100%;
+                    background-color: var(--border-color);
+                    transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                    min-height: 1px;
+                }
+
+                &.clickable {
+                    cursor: pointer;
+
+                    &:hover .bar-fill {
+                        opacity: 0.7;
+                    }
+                }
+
+                &.current {
+                    .bar-fill { background-color: var(--accent); }
+                    .bar-label { color: var(--text-primary); font-weight: 600; }
+                }
+
+                .bar-label {
+                    font-size: 0.6rem;
+                    height: 20px;
+                    line-height: 20px;
+                    color: var(--text-secondary);
+                    text-transform: uppercase;
+                    letter-spacing: 0.3px;
+                }
+            }
+        }
+    }
+
+    // ── Monthly Table ────────────────────────────────────────────────────────
     .table-container {
         padding: 0;
         overflow: hidden;
@@ -57,10 +197,11 @@
         .table-header-banner {
             background-color: var(--text-primary);
             color: var(--bg-primary);
-            text-align: center;
-            padding: v.$gap-sm;
+            padding: v.$gap-sm v.$gap-lg;
             font-weight: 700;
+            font-size: 0.75rem;
             letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .table-scroll-wrap {
@@ -75,20 +216,23 @@
 
             th,
             td {
-                // Tightened vertical padding from 12px to 6px
-                padding: 6px 12px;
+                padding: 8px 16px;
                 border: 1px solid var(--border-color);
                 white-space: nowrap;
             }
 
             th {
                 background-color: var(--bg-secondary);
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
                 font-weight: 600;
-                color: var(--text-primary);
-                padding: 10px 12px; // Keep headers slightly taller
+                color: var(--text-secondary);
+                padding: 10px 16px;
             }
 
             td {
+                font-size: 0.875rem;
                 color: var(--text-secondary);
 
                 &.fw-bold {
@@ -96,9 +240,22 @@
                     color: var(--text-primary);
                     text-align: left;
                 }
+
+                &.wr-cell { font-weight: 600; }
+                &.wr-high { color: #10b981; }
+                &.wr-mid  { color: #f59e0b; }
+                &.wr-low  { color: #ef4444; }
             }
 
-            // Highlight the current month row
+            .clickable-row {
+                cursor: pointer;
+                transition: background-color 0.15s ease;
+
+                &:hover {
+                    background-color: var(--bg-primary);
+                }
+            }
+
             .current-month-row {
                 background-color: var(--bg-primary);
 
@@ -108,14 +265,44 @@
             }
 
             .ytd-row {
-                background-color: rgba(16, 185, 129, 0.1);
                 font-weight: 700;
 
                 td {
+                    background-color: var(--bg-secondary);
                     color: var(--text-primary);
                     border-top: 2px solid var(--border-color);
                 }
             }
         }
+    }
+
+    // ── Mobile ───────────────────────────────────────────────────────────────
+    @media (max-width: 900px) {
+        .ab-kpi-strip {
+            grid-template-columns: repeat(3, 1fr);
+
+            .ab-kpi-tile:nth-child(3) { border-right: none; }
+            .ab-kpi-tile:nth-child(n+4) { border-top: 1px solid var(--border-color); }
+            .ab-kpi-tile:nth-child(6)   { border-right: none; }
+        }
+    }
+
+    @media (max-width: 600px) {
+        padding: v.$gap-lg;
+
+        .ab-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: v.$gap-xs;
+        }
+
+        .ab-kpi-strip {
+            grid-template-columns: repeat(2, 1fr);
+
+            .ab-kpi-tile:nth-child(2n) { border-right: none; }
+            .ab-kpi-tile:nth-child(n+3) { border-top: 1px solid var(--border-color); }
+        }
+
+        .bar-chart .bar-label { font-size: 0.55rem; letter-spacing: 0; }
     }
 }

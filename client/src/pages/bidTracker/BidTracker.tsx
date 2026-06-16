@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { BidDetailModal } from './components/bidDetailModal/BidDetailModal';
+import { BidDetailModal } from '../../components/bidDetailModal/BidDetailModal';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { FilterBubbles } from './components/filterBubbles/FilterBubbles';
 import { BidsTable } from './components/bidsTable/BidsTable'; // <-- Import the new component

@@ -12,11 +12,15 @@ interface NavItem {
   exact?: boolean; // Used to apply the 'end' prop for exact route matching
 }
 
+const now = new Date();
+const currentMonthPath = `/monthly/${now.getFullYear()}/${now.getMonth() + 1}`;
+
 // 2. Create the data-driven configuration array
 const NAV_ITEMS: NavItem[] = [
   { path: '/', label: 'Dashboard', exact: true },
   { path: '/tracker', label: 'Bid Tracker' },
   { path: '/annual-breakdown', label: 'Annual Breakdown' },
+  { path: currentMonthPath, label: 'Monthly View' },
   { path: '/settings', label: 'Settings' },
 ];
 

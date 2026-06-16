@@ -9,6 +9,7 @@ import { ProtectedRoute } from './components/protectedRoute/ProtectedRoute';
 import Navbar from './components/navbar/Navbar';
 import { BidDetailEdit } from './pages/bidDetailEdit/BidDetailEdit';
 import { AnnualBreakdown } from './pages/annualBreakdown/AnnualBreakdown';
+import { MonthlyBreakdown } from './pages/monthlyBreakdown/MonthlyBreakdown';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/tracker" element={<BidTracker />} />
             <Route path="/annual-breakdown" element={<AnnualBreakdown />} />
+            <Route path="/monthly/:year/:month" element={<MonthlyBreakdown />} />
             <Route path="/bids/:id/edit" element={<BidDetailEdit />} />
             <Route path="/settings" element={<Settings />} />
           </Route>

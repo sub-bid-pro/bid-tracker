@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { PageLoader } from '../../components/pageLoader/PageLoader';
@@ -15,37 +16,32 @@ interface MonthData {
 }
 
 const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
 ];
+
+const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const formatVolume = (v: number) => {
+  if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`;
+  if (v >= 1_000) return `$${Math.round(v / 1_000)}K`;
+  return v > 0 ? `$${v}` : '--';
+};
 
 export const AnnualBreakdown = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-
   const [monthlyStats, setMonthlyStats] = useState<MonthData[]>([]);
   const [ytdTotals, setYtdTotals] = useState<MonthData | null>(null);
-
   const [kpis, setKpis] = useState({
-    totalBids: 0,
-    submitted: 0,
-    dollarVolume: 0,
-    awards: 0,
-    openBids: 0,
-    winRate: 0,
+    totalBids: 0, submitted: 0, dollarVolume: 0, awards: 0, openBids: 0, winRate: 0,
+  });
+  const [statusCounts, setStatusCounts] = useState({
+    won: 0, lost: 0, submitted: 0, pending: 0, needsReview: 0,
   });
 
-  // Determine the current month name for highlighting
+  const navigate = useNavigate();
+  const currentYear = new Date().getFullYear();
   const currentMonthName = MONTH_NAMES[new Date().getMonth()];
 
   useEffect(() => {
@@ -53,7 +49,6 @@ export const AnnualBreakdown = () => {
       if (!user) return;
 
       try {
-        const currentYear = new Date().getFullYear();
         const startOfYear = new Date(`${currentYear}-01-01`).toISOString();
 
         const { data: bids, error } = await supabase
@@ -65,35 +60,28 @@ export const AnnualBreakdown = () => {
         if (error) throw error;
 
         const months: MonthData[] = MONTH_NAMES.map((name) => ({
-          name,
-          newBids: 0,
-          submitted: 0,
-          volume: 0,
-          awards: 0,
-          losses: 0,
-          winRate: 0,
+          name, newBids: 0, submitted: 0, volume: 0, awards: 0, losses: 0, winRate: 0,
         }));
 
-        let topTotalBids = 0;
-        let topSubmitted = 0;
-        let topVolume = 0;
-        let topAwards = 0;
-        let topLosses = 0;
-        let topOpen = 0;
+        let topTotalBids = 0, topSubmitted = 0, topVolume = 0;
+        let topAwards = 0, topLosses = 0, topOpen = 0;
+        const sc = { won: 0, lost: 0, submitted: 0, pending: 0, needsReview: 0 };
 
         if (bids) {
           bids.forEach((bid) => {
             topTotalBids++;
 
             const dateStr = bid.email_received_at || bid.created_at;
-            const monthIndex = new Date(dateStr).getMonth();
-            const bucket = months[monthIndex];
-
+            const bucket = months[new Date(dateStr).getMonth()];
             bucket.newBids++;
 
-            if (['Needs Review', 'Pending'].includes(bid.status)) {
-              topOpen++;
-            }
+            if (bid.status === 'Won') sc.won++;
+            else if (bid.status === 'Lost') sc.lost++;
+            else if (bid.status === 'Submitted') sc.submitted++;
+            else if (bid.status === 'Pending') sc.pending++;
+            else if (bid.status === 'Needs Review') sc.needsReview++;
+
+            if (['Needs Review', 'Pending'].includes(bid.status)) topOpen++;
 
             if (['Submitted', 'Won', 'Lost'].includes(bid.status)) {
               bucket.submitted++;
@@ -103,13 +91,8 @@ export const AnnualBreakdown = () => {
               bucket.volume += amount;
               topVolume += amount;
 
-              if (bid.status === 'Won') {
-                bucket.awards++;
-                topAwards++;
-              } else if (bid.status === 'Lost') {
-                bucket.losses++;
-                topLosses++;
-              }
+              if (bid.status === 'Won') { bucket.awards++; topAwards++; }
+              else if (bid.status === 'Lost') { bucket.losses++; topLosses++; }
             }
           });
         }
@@ -123,23 +106,14 @@ export const AnnualBreakdown = () => {
         const topWinRate = ytdDecided > 0 ? Math.round((topAwards / ytdDecided) * 100) : 0;
 
         setMonthlyStats(months);
+        setStatusCounts(sc);
         setYtdTotals({
-          name: 'YTD TOTAL',
-          newBids: topTotalBids,
-          submitted: topSubmitted,
-          volume: topVolume,
-          awards: topAwards,
-          losses: topLosses,
-          winRate: topWinRate,
+          name: 'YTD TOTAL', newBids: topTotalBids, submitted: topSubmitted,
+          volume: topVolume, awards: topAwards, losses: topLosses, winRate: topWinRate,
         });
-
         setKpis({
-          totalBids: topTotalBids,
-          submitted: topSubmitted,
-          dollarVolume: topVolume,
-          awards: topAwards,
-          openBids: topOpen,
-          winRate: topWinRate,
+          totalBids: topTotalBids, submitted: topSubmitted, dollarVolume: topVolume,
+          awards: topAwards, openBids: topOpen, winRate: topWinRate,
         });
       } catch (error) {
         console.error('Error fetching breakdown:', error);
@@ -151,43 +125,117 @@ export const AnnualBreakdown = () => {
     fetchAndAggregateData();
   }, [user]);
 
+  const maxBids = useMemo(
+    () => Math.max(...monthlyStats.map((m) => m.newBids), 1),
+    [monthlyStats],
+  );
+
   if (isLoading) return <PageLoader />;
+
+  const total = kpis.totalBids;
 
   return (
     <div className="breakdown-wrapper">
-      <header className="page-header">
-        <h1>Bid Tracker Dashboard — YTD {new Date().getFullYear()}</h1>
+      <header className="ab-header">
+        <div>
+          <h1>Annual Breakdown</h1>
+          <p>Year-to-date performance summary</p>
+        </div>
+        <span className="ab-year">{currentYear}</span>
       </header>
 
-      <section className="kpi-bar geometric-container">
-        <div className="kpi-item">
+      <section className="ab-kpi-strip">
+        <div className="ab-kpi-tile">
+          <span className="kpi-val">{kpis.totalBids}</span>
           <span className="kpi-label">Total Bids</span>
-          <span className="kpi-value">{kpis.totalBids}</span>
         </div>
-        <div className="kpi-item">
+        <div className="ab-kpi-tile">
+          <span className="kpi-val">{kpis.submitted}</span>
           <span className="kpi-label">Submitted</span>
-          <span className="kpi-value">{kpis.submitted}</span>
         </div>
-        <div className="kpi-item">
+        <div className="ab-kpi-tile">
+          <span className="kpi-val">{formatVolume(kpis.dollarVolume)}</span>
           <span className="kpi-label">Dollar Volume</span>
-          <span className="kpi-value">${kpis.dollarVolume.toLocaleString()}</span>
         </div>
-        <div className="kpi-item">
+        <div className="ab-kpi-tile">
+          <span className="kpi-val">{kpis.awards}</span>
           <span className="kpi-label">Awards</span>
-          <span className="kpi-value">{kpis.awards}</span>
         </div>
-        <div className="kpi-item">
+        <div className="ab-kpi-tile">
+          <span className="kpi-val">{kpis.openBids}</span>
           <span className="kpi-label">Open Bids</span>
-          <span className="kpi-value">{kpis.openBids}</span>
         </div>
-        <div className="kpi-item">
+        <div className="ab-kpi-tile">
+          <span className="kpi-val">{kpis.winRate > 0 ? `${kpis.winRate}%` : '--'}</span>
           <span className="kpi-label">Win Rate</span>
-          <span className="kpi-value">{kpis.winRate}%</span>
+        </div>
+      </section>
+
+      {total > 0 && (
+        <section className="ab-distribution geometric-container">
+          <h2 className="ab-section-title">Status Distribution</h2>
+          <div className="dist-bar">
+            {statusCounts.won > 0 && (
+              <div className="dist-seg seg-won" style={{ width: `${(statusCounts.won / total) * 100}%` }} title={`Won: ${statusCounts.won}`} />
+            )}
+            {statusCounts.submitted > 0 && (
+              <div className="dist-seg seg-submitted" style={{ width: `${(statusCounts.submitted / total) * 100}%` }} title={`Submitted: ${statusCounts.submitted}`} />
+            )}
+            {statusCounts.pending > 0 && (
+              <div className="dist-seg seg-pending" style={{ width: `${(statusCounts.pending / total) * 100}%` }} title={`Pending: ${statusCounts.pending}`} />
+            )}
+            {statusCounts.needsReview > 0 && (
+              <div className="dist-seg seg-review" style={{ width: `${(statusCounts.needsReview / total) * 100}%` }} title={`Needs Review: ${statusCounts.needsReview}`} />
+            )}
+            {statusCounts.lost > 0 && (
+              <div className="dist-seg seg-lost" style={{ width: `${(statusCounts.lost / total) * 100}%` }} title={`Lost: ${statusCounts.lost}`} />
+            )}
+          </div>
+          <div className="dist-legend">
+            {statusCounts.won > 0 && (
+              <span className="leg-item"><i className="leg-dot dot-won" />{statusCounts.won} Won</span>
+            )}
+            {statusCounts.submitted > 0 && (
+              <span className="leg-item"><i className="leg-dot dot-submitted" />{statusCounts.submitted} Submitted</span>
+            )}
+            {statusCounts.pending > 0 && (
+              <span className="leg-item"><i className="leg-dot dot-pending" />{statusCounts.pending} Pending</span>
+            )}
+            {statusCounts.needsReview > 0 && (
+              <span className="leg-item"><i className="leg-dot dot-review" />{statusCounts.needsReview} Needs Review</span>
+            )}
+            {statusCounts.lost > 0 && (
+              <span className="leg-item"><i className="leg-dot dot-lost" />{statusCounts.lost} Lost</span>
+            )}
+          </div>
+        </section>
+      )}
+
+      <section className="ab-chart geometric-container">
+        <h2 className="ab-section-title">Monthly New Bids</h2>
+        <div className="bar-chart">
+          {monthlyStats.map((month, i) => (
+            <div
+              key={month.name}
+              className={`bar-col clickable${month.name === currentMonthName ? ' current' : ''}`}
+              onClick={() => navigate(`/monthly/${currentYear}/${i + 1}`)}
+              title={`View ${month.name} ${currentYear}`}
+            >
+              <span className="bar-count">{month.newBids > 0 ? month.newBids : ''}</span>
+              <div className="bar-inner">
+                <div
+                  className="bar-fill"
+                  style={{ height: `${Math.round((month.newBids / maxBids) * 100)}%` }}
+                />
+              </div>
+              <span className="bar-label">{MONTH_SHORT[i]}</span>
+            </div>
+          ))}
         </div>
       </section>
 
       <section className="table-container geometric-container">
-        <div className="table-header-banner">MONTHLY BREAKDOWN</div>
+        <div className="table-header-banner">Monthly Breakdown</div>
         <div className="table-scroll-wrap">
           <table className="breakdown-table">
             <thead>
@@ -202,32 +250,45 @@ export const AnnualBreakdown = () => {
               </tr>
             </thead>
             <tbody>
-              {monthlyStats.map((row) => (
-                <tr
-                  key={row.name}
-                  // Dynamically apply the current-month-row class
-                  className={row.name === currentMonthName ? 'current-month-row' : ''}
-                >
-                  <td className="fw-bold">{row.name}</td>
-                  <td>{row.newBids}</td>
-                  <td>{row.submitted}</td>
-                  <td>${row.volume.toLocaleString()}</td>
-                  <td>{row.awards}</td>
-                  <td>{row.losses}</td>
-                  <td>{row.winRate}%</td>
-                </tr>
-              ))}
+              {monthlyStats.map((row, i) => {
+                const hasDecided = row.awards + row.losses > 0;
+                const wrClass = !hasDecided
+                  ? ''
+                  : row.winRate >= 60
+                  ? 'wr-high'
+                  : row.winRate >= 30
+                  ? 'wr-mid'
+                  : 'wr-low';
+                return (
+                  <tr
+                    key={row.name}
+                    className={`clickable-row${row.name === currentMonthName ? ' current-month-row' : ''}`}
+                    onClick={() => navigate(`/monthly/${currentYear}/${i + 1}`)}
+                    title={`View ${row.name} ${currentYear}`}
+                  >
+                    <td className="fw-bold">{row.name}</td>
+                    <td>{row.newBids || '--'}</td>
+                    <td>{row.submitted || '--'}</td>
+                    <td>{formatVolume(row.volume)}</td>
+                    <td>{row.awards || '--'}</td>
+                    <td>{row.losses || '--'}</td>
+                    <td className={`wr-cell ${wrClass}`}>
+                      {hasDecided ? `${row.winRate}%` : '--'}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
             {ytdTotals && (
               <tfoot>
                 <tr className="ytd-row">
                   <td>{ytdTotals.name}</td>
-                  <td>{ytdTotals.newBids}</td>
-                  <td>{ytdTotals.submitted}</td>
-                  <td>${ytdTotals.volume.toLocaleString()}</td>
-                  <td>{ytdTotals.awards}</td>
-                  <td>{ytdTotals.losses}</td>
-                  <td>{ytdTotals.winRate}%</td>
+                  <td>{ytdTotals.newBids || '--'}</td>
+                  <td>{ytdTotals.submitted || '--'}</td>
+                  <td>{formatVolume(ytdTotals.volume)}</td>
+                  <td>{ytdTotals.awards || '--'}</td>
+                  <td>{ytdTotals.losses || '--'}</td>
+                  <td className="wr-cell">{ytdTotals.winRate > 0 ? `${ytdTotals.winRate}%` : '--'}</td>
                 </tr>
               </tfoot>
             )}
