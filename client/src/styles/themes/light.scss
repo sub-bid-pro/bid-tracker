@@ -1,10 +1,69 @@
 [data-theme="light"] {
+    // ── Surfaces ─────────────────────────────────────────────────────────────
     --bg-primary: #{$gray-50};
     --bg-secondary: #{$white};
+    --table-bg: #{$gray-100};
+
+    // ── Text ─────────────────────────────────────────────────────────────────
     --text-primary: #{$gray-900};
-    --text-secondary: #{$gray-800};
+    --text-secondary: #{$gray-600};
+
+    // ── Borders ──────────────────────────────────────────────────────────────
     --border-color: #{$gray-350};
+
+    // ── Accent (monochrome) ───────────────────────────────────────────────────
     --accent: #{$black};
 
-    --table-bg: #{$gray-100};
+    // ── Navbar ───────────────────────────────────────────────────────────────
+    --navbar-bg: #{$white};
+    --navbar-border: #{$gray-350};
+    --navbar-text: #{$black};
+    --navbar-icon: #{$black};
+    --navbar-hover-bg: rgba(255, 255, 255, 0.1);
+
+    // ── Overlays & shadows ────────────────────────────────────────────────────
+    --overlay-bg: rgba(0, 0, 0, 0.4);
+    --modal-overlay-bg: rgba(0, 0, 0, 0.6);
+    --modal-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    --drawer-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+    --toast-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    // ── Semantic colors ───────────────────────────────────────────────────────
+    --color-success: #{$green-500};
+    --color-warning: #{$yellow-500};
+    --color-danger: #{$red-500};
+    --color-info: #{$blue-500};
+    --color-danger-bg: rgba(239, 68, 68, 0.1);
+    --color-warning-bg: rgba(245, 158, 11, 0.1);
+    --color-success-bg: rgba(16, 185, 129, 0.1);
+
+    // ── Status badge colors ───────────────────────────────────────────────────
+    --status-review-color: #{$red-500};
+    --status-review-bg: rgba(239, 68, 68, 0.1);
+    --status-pending-color: #{$yellow-500};
+    --status-pending-bg: rgba(245, 158, 11, 0.1);
+    --status-submitted-color: #{$green-500};
+    --status-submitted-bg: rgba(16, 185, 129, 0.1);
+    --status-won-color: #{$blue-500};
+    --status-won-bg: rgba(59, 130, 246, 0.1);
+    --status-lost-color: #{$zinc-500};
+    --status-lost-bg: rgba(113, 113, 122, 0.1);
+
+    // ── Chart / distribution segment colors ───────────────────────────────────
+    --seg-won: #{$blue-500};
+    --seg-submitted: #{$green-500};
+    --seg-pending: #{$yellow-500};
+    --seg-review: #{$red-500};
+    --seg-lost: #{$zinc-500};
+
+    // ── Win-rate cell colors ──────────────────────────────────────────────────
+    --wr-high: #{$green-500};
+    --wr-mid: #{$yellow-500};
+    --wr-low: #{$red-500};
+
+    // ── Toast accent bars ─────────────────────────────────────────────────────
+    --toast-success: #{$green-500};
+    --toast-error: #{$red-500};
+    --toast-info: #{$blue-500};
+    --toast-warning: #{$yellow-500};
 }

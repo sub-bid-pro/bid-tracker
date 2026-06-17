@@ -55,11 +55,7 @@
             }
 
             &.kpi-alert .kpi-val {
-                color: #ef4444;
-            }
-
-            [data-theme="dark"] &.kpi-alert .kpi-val {
-                color: #f87171;
+                color: var(--color-danger);
             }
 
             .kpi-val {

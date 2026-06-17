@@ -1,12 +1,16 @@
-// Precise pixel-gap adjustments
+// ── Spacing scale ─────────────────────────────────────────────────────────────
 $gap-xs: 4px;
 $gap-sm: 8px;
 $gap-md: 16px;
 $gap-lg: 24px;
 $gap-xl: 32px;
 
-// Sharp, geometric corners
-$radius-none: 6px;
-$radius-sm: 4px;
+// ── Border radius ─────────────────────────────────────────────────────────────
+$radius-sm: 4px;   // small interactive elements: buttons, tags, inputs
+$radius-md: 6px;   // containers, cards, panels, modals
 
+// Alias kept so older files that haven't been migrated continue to compile
+$radius-none: $radius-md;
+
+// ── Layout ────────────────────────────────────────────────────────────────────
 $nav-height: 50px;

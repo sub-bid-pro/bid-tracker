@@ -11,7 +11,7 @@
   border-radius: vars.$radius-sm;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--toast-shadow);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -33,34 +33,34 @@
   }
 
   &.success {
-    border-top: 3px solid #10b981;
+    border-top: 3px solid var(--toast-success);
 
     .toast-progress {
-      background: #10b981;
+      background: var(--toast-success);
     }
   }
 
   &.error {
-    border-top: 3px solid #ef4444;
+    border-top: 3px solid var(--toast-error);
 
     .toast-progress {
-      background: #ef4444;
+      background: var(--toast-error);
     }
   }
 
   &.info {
-    border-top: 3px solid #3b82f6;
+    border-top: 3px solid var(--toast-info);
 
     .toast-progress {
-      background: #3b82f6;
+      background: var(--toast-info);
     }
   }
 
   &.warning {
-    border-top: 3px solid #f59e0b;
+    border-top: 3px solid var(--toast-warning);
 
     .toast-progress {
-      background: #f59e0b;
+      background: var(--toast-warning);
     }
   }
 }

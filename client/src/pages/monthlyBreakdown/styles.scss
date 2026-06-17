@@ -155,11 +155,11 @@
                 height: 100%;
                 transition: width 0.4s ease;
 
-                &.seg-won       { background-color: #3b82f6; }
-                &.seg-submitted { background-color: #10b981; }
-                &.seg-pending   { background-color: #f59e0b; }
-                &.seg-review    { background-color: #ef4444; }
-                &.seg-lost      { background-color: #71717a; }
+                &.seg-won       { background-color: var(--seg-won); }
+                &.seg-submitted { background-color: var(--seg-submitted); }
+                &.seg-pending   { background-color: var(--seg-pending); }
+                &.seg-review    { background-color: var(--seg-review); }
+                &.seg-lost      { background-color: var(--seg-lost); }
             }
         }
 
@@ -182,11 +182,11 @@
                     height: 10px;
                     flex-shrink: 0;
 
-                    &.dot-won       { background-color: #3b82f6; }
-                    &.dot-submitted { background-color: #10b981; }
-                    &.dot-pending   { background-color: #f59e0b; }
-                    &.dot-review    { background-color: #ef4444; }
-                    &.dot-lost      { background-color: #71717a; }
+                    &.dot-won       { background-color: var(--seg-won); }
+                    &.dot-submitted { background-color: var(--seg-submitted); }
+                    &.dot-pending   { background-color: var(--seg-pending); }
+                    &.dot-review    { background-color: var(--seg-review); }
+                    &.dot-lost      { background-color: var(--seg-lost); }
                 }
             }
         }

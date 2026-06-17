@@ -7,7 +7,7 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        background-color: rgba(0, 0, 0, 0.6);
+        background-color: var(--modal-overlay-bg);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -27,7 +27,7 @@
         border-radius: v.$radius-none; // Geometric sharp edges
         max-width: 600px;
         width: 90%;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        box-shadow: var(--modal-shadow);
         border-top: 6px solid var(--accent);
         color: var(--text-primary);
 

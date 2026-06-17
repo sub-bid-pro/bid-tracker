@@ -250,14 +250,14 @@
 
             &.danger-btn {
                 background-color: transparent;
-                color: #ef4444;
-                border: 2px solid #ef4444;
+                color: var(--color-danger);
+                border: 2px solid var(--color-danger);
                 cursor: pointer;
                 width: 100%;
                 max-width: 400px;
 
                 &:hover:not(:disabled) {
-                    background-color: #ef4444;
+                    background-color: var(--color-danger);
                     color: var(--bg-secondary);
                 }
 
