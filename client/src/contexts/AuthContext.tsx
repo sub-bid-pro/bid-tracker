@@ -2,7 +2,10 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
-interface Profile {
+export type AccessState = 'trialing' | 'active' | 'expired' | 'past_due' | 'canceled';
+export type Role = 'member' | 'admin';
+
+export interface Profile {
   id: string;
   username: string;
   first_name: string;
@@ -14,6 +17,17 @@ interface Profile {
   gmail_connected: boolean;
   drive_root_folder_name?: string;
   storage_preference?: string;
+  // ── Billing (Phase 1–3) ──────────────────────────────────────────────────
+  role?: Role;
+  access_state?: AccessState;
+  trial_ends_at?: string | null;
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
+  successful_payment_count?: number | null;
+  grace_started_at?: string | null;
+  grace_ends_at?: string | null;
+  current_period_end?: string | null;
+  cancel_at_period_end?: boolean | null;
 }
 
 interface AuthContextType {

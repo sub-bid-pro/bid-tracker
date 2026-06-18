@@ -1,12 +1,14 @@
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { resolveView } from '../../lib/access';
 import './styles.scss';
 
 export const Splash = () => {
-  const { session } = useAuth();
+  const { session, profile } = useAuth();
 
-  // If a user is already logged in, seamlessly push them to the dashboard
-  if (session) {
+  // Logged-in users WITH access go straight to the app. Locked users
+  // (expired / canceled / past-due) can still view this marketing overview.
+  if (session && resolveView(profile) !== 'wall') {
     return <Navigate to="/" replace />;
   }
 

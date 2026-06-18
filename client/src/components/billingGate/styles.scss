@@ -1,0 +1,162 @@
+@use "../../styles/variables" as v;
+
+/* ── Friendly full-page locked state ─────────────────────────────────────── */
+.locked-screen {
+  min-height: calc(100vh - v.$nav-height);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: v.$gap-xl v.$gap-lg;
+  background-color: var(--bg-primary);
+
+  .locked-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-top: 4px solid var(--accent);
+    border-radius: v.$radius-md;
+    box-shadow: var(--drawer-shadow);
+    padding: v.$gap-xl;
+    max-width: 460px;
+    width: 100%;
+    margin-top: 6vh;
+    text-align: center;
+
+    .locked-eyebrow {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: v.$gap-md;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+      margin-bottom: v.$gap-xs;
+    }
+
+    .locked-sub {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin-bottom: v.$gap-lg;
+    }
+
+    .locked-benefits {
+      list-style: none;
+      text-align: left;
+      display: inline-flex;
+      flex-direction: column;
+      gap: v.$gap-sm;
+      margin: 0 auto v.$gap-lg;
+      padding: 0;
+
+      li {
+        position: relative;
+        padding-left: 26px;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+
+        &::before {
+          content: "✓";
+          position: absolute;
+          left: 0;
+          top: 0;
+          color: var(--color-success);
+          font-weight: 800;
+        }
+      }
+    }
+
+    .locked-links {
+      margin-top: v.$gap-lg;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+
+      a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 600;
+        &:hover { color: var(--text-primary); }
+      }
+    }
+
+    .locked-secondary {
+      margin-top: v.$gap-sm;
+      font-size: 0.85rem;
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+        &:hover { text-decoration: underline; }
+      }
+    }
+  }
+}
+
+/* ── Shared CTA button ───────────────────────────────────────────────────── */
+.billing-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: v.$gap-md v.$gap-lg;
+  background-color: var(--accent);
+  color: var(--bg-secondary);
+  border: 2px solid var(--accent);
+  border-radius: v.$radius-sm;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background-color: transparent;
+    color: var(--accent);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+/* ── Dunning grace banner ────────────────────────────────────────────────── */
+.billing-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: v.$gap-md;
+  flex-wrap: wrap;
+  padding: v.$gap-sm v.$gap-lg;
+  background-color: var(--color-warning-bg);
+  border-bottom: 1px solid var(--color-warning);
+  color: var(--text-primary);
+
+  &__text {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  &__cta {
+    padding: 6px v.$gap-md;
+    background-color: var(--color-warning);
+    color: var(--bg-secondary);
+    border: none;
+    border-radius: v.$radius-sm;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:hover:not(:disabled) { opacity: 0.85; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+}

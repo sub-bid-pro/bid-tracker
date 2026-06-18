@@ -139,6 +139,17 @@
         flex-direction: column;
         padding: v.$gap-md 0;
 
+        .nav-section-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            padding: v.$gap-md v.$gap-lg v.$gap-xs;
+            margin-top: v.$gap-sm;
+            border-top: 1px solid var(--border-color);
+        }
+
         a {
             text-decoration: none;
             color: var(--text-primary);

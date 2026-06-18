@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec tsx src/index.ts",
-    "start": "tsx src/index.ts"
+    "start": "tsx src/index.ts",
+    "worker:trial-reminder": "tsx src/workers/trialReminder.ts",
+    "worker:trial-expiry": "tsx src/workers/trialExpiry.ts",
+    "worker:grace-expiry": "tsx src/workers/graceExpiry.ts",
+    "worker:cron": "tsx src/workers/runDailyJobs.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.103.3",
@@ -14,7 +18,9 @@
     "express": "^5.2.1",
     "googleapis": "^171.4.0",
     "pdf-parse": "^2.4.5",
-    "pg": "^8.20.0"
+    "pg": "^8.20.0",
+    "postmark": "^4.0.7",
+    "stripe": "^22.2.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

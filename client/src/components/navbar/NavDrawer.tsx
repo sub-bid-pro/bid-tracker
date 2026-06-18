@@ -15,13 +15,22 @@ interface NavItem {
 const now = new Date();
 const currentMonthPath = `/monthly/${now.getFullYear()}/${now.getMonth() + 1}`;
 
-// 2. Create the data-driven configuration array
-const NAV_ITEMS: NavItem[] = [
+// 2. Create the data-driven configuration arrays
+const APP_ITEMS: NavItem[] = [
   { path: '/', label: 'Dashboard', exact: true },
   { path: '/tracker', label: 'Bid Tracker' },
   { path: '/annual-breakdown', label: 'Annual Breakdown' },
   { path: currentMonthPath, label: 'Monthly View' },
   { path: '/settings', label: 'Settings' },
+];
+
+// Non-gated info/marketing pages — always reachable, even when locked.
+const INFO_ITEMS: NavItem[] = [
+  { path: '/welcome', label: 'Overview' },
+  { path: '/pricing', label: 'Pricing' },
+  { path: '/help', label: 'Help' },
+  { path: '/faq', label: 'FAQ' },
+  { path: '/demos', label: 'Demos' },
 ];
 
 export const NavDrawer = ({ isOpen, onClose }: NavDrawerProps) => {
@@ -48,8 +57,14 @@ export const NavDrawer = ({ isOpen, onClose }: NavDrawerProps) => {
         </div>
 
         <div className="nav-links">
-          {/* 3. Iterate over the array to render links dynamically */}
-          {NAV_ITEMS.map((item) => (
+          {APP_ITEMS.map((item) => (
+            <NavLink key={item.path} to={item.path} end={item.exact} onClick={onClose}>
+              {item.label}
+            </NavLink>
+          ))}
+
+          <span className="nav-section-label">Resources</span>
+          {INFO_ITEMS.map((item) => (
             <NavLink key={item.path} to={item.path} end={item.exact} onClick={onClose}>
               {item.label}
             </NavLink>

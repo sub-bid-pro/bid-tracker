@@ -284,3 +284,52 @@
         }
     }
 }
+
+/* ── Subscription status row (BillingSettings) ───────────────────────────── */
+.sub-status {
+    display: flex;
+    align-items: center;
+    gap: v.$gap-md;
+    flex-wrap: wrap;
+
+    &__pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: v.$radius-sm;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: 1px solid;
+
+        &--ok {
+            color: var(--color-success);
+            border-color: var(--color-success);
+            background-color: var(--color-success-bg);
+        }
+
+        &--warn {
+            color: var(--color-warning);
+            border-color: var(--color-warning);
+            background-color: var(--color-warning-bg);
+        }
+
+        &--bad {
+            color: var(--color-danger);
+            border-color: var(--color-danger);
+            background-color: var(--color-danger-bg);
+        }
+
+        &--muted {
+            color: var(--text-secondary);
+            border-color: var(--border-color);
+            background-color: var(--bg-primary);
+        }
+    }
+
+    &__detail {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+}

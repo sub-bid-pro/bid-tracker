@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ProfileSettings } from './components/ProfileSettings';
 import { IntegrationSettings } from './components/IntegrationSettings';
+import { BillingSettings } from './components/BillingSettings';
 import { PreferenceSettings } from './components/PreferenceSettings';
 import { LogoutSettings } from './components/LogoutSettings';
 import { SettingsSidebar } from './components/SettingsSidebar';
@@ -18,6 +19,11 @@ const SETTINGS_CONFIG = [
     id: 'preferences',
     label: 'App Preferences',
     component: <PreferenceSettings />,
+  },
+  {
+    id: 'billing',
+    label: 'Subscription',
+    component: <BillingSettings />,
   },
   {
     id: 'integrations',

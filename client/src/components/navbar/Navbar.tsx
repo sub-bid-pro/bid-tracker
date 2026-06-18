@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { resolveView } from '../../lib/access';
 import { NavDrawer } from './NavDrawer';
 import './styles.scss';
 
@@ -13,6 +14,11 @@ const Navbar = () => {
 
   // Determine if we should show the navigation tools
   const showNav = session && profile?.onboarding_complete;
+
+  // When the user hasn't passed the billing gate, the logo should lead to the
+  // marketing overview rather than the (locked) dashboard.
+  const locked = !!session && resolveView(profile) === 'wall';
+  const brandTo = locked ? '/welcome' : '/';
 
   return (
     <>
@@ -36,7 +42,7 @@ const Navbar = () => {
           )}
         </div>
 
-        <Link to="/" className="nav-brand" onClick={closeMenu}>
+        <Link to={brandTo} className="nav-brand" onClick={closeMenu}>
           Sub Bid Pro
         </Link>
       </nav>
